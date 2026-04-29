@@ -34,7 +34,7 @@ export default function AdminProductsPage() {
           <BrandLogo className="h-12 w-[150px]" />
           <div>
             <p className="text-[11px] uppercase tracking-[0.34em] text-muted-foreground">
-              Mina admin
+              Atlas admin
             </p>
             <h1 className="font-serif text-2xl font-bold md:text-3xl">Produits</h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -109,6 +109,12 @@ export default function AdminProductsPage() {
                         </p>
                         <p className="font-semibold">{product.stock}</p>
                       </div>
+                      <div className="col-span-2">
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                          Poids
+                        </p>
+                        <p className="font-semibold">{product.weights.join(", ") || "-"}</p>
+                      </div>
                     </div>
 
                     {product.featured ? (
@@ -156,6 +162,9 @@ export default function AdminProductsPage() {
                     Stock
                   </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold tracking-widest uppercase hidden xl:table-cell">
+                    Poids
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold tracking-widest uppercase hidden xl:table-cell">
                     Statut
                   </th>
                   <th className="text-right px-4 py-3 text-xs font-semibold tracking-widest uppercase">
@@ -192,6 +201,9 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground">
                       {product.stock}
+                    </td>
+                    <td className="px-4 py-3 hidden xl:table-cell text-muted-foreground">
+                      {product.weights.join(", ") || "-"}
                     </td>
                     <td className="px-4 py-3 hidden xl:table-cell">
                       <span

@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import atlasLogo from "@/assets/atlas-logo.webp";
 
 export default function Footer() {
   const { t } = useTranslation("common");
@@ -11,9 +12,7 @@ export default function Footer() {
     <footer className="bg-[oklch(0.2_0.04_45)] text-[oklch(0.85_0.03_75)]">
       <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-12">
         <div>
-          <h3 className="text-2xl font-light tracking-widest uppercase text-[oklch(0.85_0.12_70)] mb-4" style={{ fontFamily: "Cormorant Garamond, serif" }}>
-            ATLAS-Miel
-          </h3>
+          <img src={atlasLogo} alt="ATLAS" className="mb-5 h-20 w-40 object-contain" />
           <p className="text-sm leading-relaxed opacity-70" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.8rem" }}>
             {t("footer.tagline")}
           </p>

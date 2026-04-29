@@ -12,6 +12,7 @@ import type { ProductCategory } from "@/types";
 
 const MAX_IMAGES = 8;
 const DEFAULT_PRODUCT_CATEGORY: ProductCategory = "femme";
+const PRESET_WEIGHTS = ["500g", "1kg"];
 
 const EMPTY_FORM = {
   name: "",
@@ -19,9 +20,7 @@ const EMPTY_FORM = {
   price: "",
   comparePrice: "",
   images: [] as string[],
-  sizes: "",
-  shoeSizes: "",
-  colors: "",
+  weights: "500g,1kg",
   stock: "10",
   featured: false,
   active: true,
@@ -32,6 +31,14 @@ function parseCsv(value: string) {
     .split(/[,\n]/)
     .map((entry) => entry.trim())
     .filter(Boolean);
+}
+
+function normalizeWeights(value: string[]) {
+  return Array.from(new Set(value.map((entry) => entry.trim()).filter(Boolean)));
+}
+
+function getCustomWeights(value: string) {
+  return parseCsv(value).filter((entry) => !PRESET_WEIGHTS.includes(entry));
 }
 
 function readFileAsDataUrl(file: File) {
@@ -87,9 +94,6 @@ export default function AdminProductEditorPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [enableSizes, setEnableSizes] = useState(false);
-  const [enableShoeSizes, setEnableShoeSizes] = useState(false);
-  const [enableColors, setEnableColors] = useState(false);
 
   if (!canManageProducts) {
     return <Navigate to="/admin/orders" replace />;
@@ -98,9 +102,6 @@ export default function AdminProductEditorPage() {
   useEffect(() => {
     if (isNew) {
       setForm(EMPTY_FORM);
-      setEnableSizes(false);
-      setEnableShoeSizes(false);
-      setEnableColors(false);
       return;
     }
 
@@ -114,16 +115,11 @@ export default function AdminProductEditorPage() {
       price: String(product.price),
       comparePrice: product.comparePrice ? String(product.comparePrice) : "",
       images: product.images,
-      sizes: product.sizes.join(","),
-      shoeSizes: product.shoeSizes.join(","),
-      colors: product.colors.join(","),
+      weights: product.weights.join(","),
       stock: String(product.stock),
       featured: product.featured,
       active: product.active,
     });
-    setEnableSizes(product.sizes.length > 0);
-    setEnableShoeSizes(product.shoeSizes.length > 0);
-    setEnableColors(product.colors.length > 0);
   }, [isNew, product]);
 
   const handleChange = (
@@ -183,11 +179,44 @@ export default function AdminProductEditorPage() {
     }));
   };
 
+  const togglePresetWeight = (weight: string) => {
+    setForm((current) => {
+      const weights = parseCsv(current.weights);
+      const nextWeights = weights.includes(weight)
+        ? weights.filter((entry) => entry !== weight)
+        : [...weights, weight];
+
+      return {
+        ...current,
+        weights: normalizeWeights(nextWeights).join(","),
+      };
+    });
+  };
+
+  const handleCustomWeightsChange = (value: string) => {
+    setForm((current) => {
+      const selectedPresets = parseCsv(current.weights).filter((entry) =>
+        PRESET_WEIGHTS.includes(entry),
+      );
+
+      return {
+        ...current,
+        weights: normalizeWeights([...selectedPresets, ...parseCsv(value)]).join(","),
+      };
+    });
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!form.name.trim() || !form.price.trim()) {
       toast.error("Nom et prix requis");
+      return;
+    }
+
+    const weights = parseCsv(form.weights);
+    if (weights.length === 0) {
+      toast.error("Selectionne au moins un poids.");
       return;
     }
 
@@ -200,9 +229,10 @@ export default function AdminProductEditorPage() {
       comparePrice: form.comparePrice ? Number(form.comparePrice) : undefined,
       category: DEFAULT_PRODUCT_CATEGORY,
       images: form.images.filter(Boolean),
-      sizes: enableSizes ? parseCsv(form.sizes) : [],
-      shoeSizes: enableShoeSizes ? parseCsv(form.shoeSizes) : [],
-      colors: enableColors ? parseCsv(form.colors) : [],
+      weights,
+      sizes: weights,
+      shoeSizes: [],
+      colors: [],
       stock: Number(form.stock),
       featured: form.featured,
       active: form.active,
@@ -270,7 +300,7 @@ export default function AdminProductEditorPage() {
       <form onSubmit={handleSubmit} className="grid max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5 md:col-span-2">
           <Label>Nom *</Label>
-          <Input name="name" value={form.name} onChange={handleChange} placeholder="Robe classique" />
+          <Input name="name" value={form.name} onChange={handleChange} placeholder="Miel de montagne" />
         </div>
 
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5">
@@ -364,74 +394,39 @@ export default function AdminProductEditorPage() {
 
         <div className="space-y-4 rounded-[24px] border border-border bg-white/75 p-5 md:col-span-2">
           <div>
-            <p className="font-medium text-sm">Options produit</p>
+            <p className="font-medium text-sm">Poids du produit</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Active uniquement les champs utiles pour ce produit.
+              Choisis 500g, 1kg, les deux, ou ajoute un autre poids manuellement.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={enableSizes}
-                onChange={(event) => setEnableSizes(event.target.checked)}
-              />
-              Activer les tailles
-            </label>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={enableShoeSizes}
-                onChange={(event) => setEnableShoeSizes(event.target.checked)}
-              />
-              Activer les pointures
-            </label>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={enableColors}
-                onChange={(event) => setEnableColors(event.target.checked)}
-              />
-              Activer les couleurs
-            </label>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {PRESET_WEIGHTS.map((weight) => (
+              <label
+                key={weight}
+                className="flex cursor-pointer items-center gap-3 border border-border bg-background px-4 py-3 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={parseCsv(form.weights).includes(weight)}
+                  onChange={() => togglePresetWeight(weight)}
+                />
+                {weight}
+              </label>
+            ))}
           </div>
 
-          {enableSizes ? (
-            <div className="space-y-1">
-              <Label>Tailles</Label>
-              <Input
-                name="sizes"
-                value={form.sizes}
-                onChange={handleChange}
-                placeholder="XS,S,M,L,XL"
-              />
-            </div>
-          ) : null}
-
-          {enableShoeSizes ? (
-            <div className="space-y-1">
-              <Label>Pointures</Label>
-              <Input
-                name="shoeSizes"
-                value={form.shoeSizes}
-                onChange={handleChange}
-                placeholder="39,40,41,42,43"
-              />
-            </div>
-          ) : null}
-
-          {enableColors ? (
-            <div className="space-y-1">
-              <Label>Couleurs</Label>
-              <Input
-                name="colors"
-                value={form.colors}
-                onChange={handleChange}
-                placeholder="Noir,Blanc"
-              />
-            </div>
-          ) : null}
+          <div className="space-y-1">
+            <Label>Autre poids</Label>
+            <Input
+              value={getCustomWeights(form.weights).join(",")}
+              onChange={(event) => handleCustomWeightsChange(event.target.value)}
+              placeholder="250g,2kg"
+            />
+            <p className="text-xs text-muted-foreground">
+              Separe plusieurs poids avec une virgule.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5">

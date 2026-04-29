@@ -16,6 +16,7 @@ export interface Product {
   comparePrice?: number;
   category: ProductCategory;
   images: string[];
+  weights: string[];
   sizes: string[];
   shoeSizes: string[];
   colors: string[];
@@ -31,6 +32,7 @@ export interface ProductDraft {
   comparePrice?: number;
   category: ProductCategory;
   images: string[];
+  weights: string[];
   sizes: string[];
   shoeSizes: string[];
   colors: string[];

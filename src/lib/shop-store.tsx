@@ -118,9 +118,7 @@ function productToRow(product: Product) {
     compare_price: product.comparePrice ?? null,
     category: product.category,
     images: product.images,
-    sizes: product.sizes,
-    shoe_sizes: product.shoeSizes,
-    colors: product.colors,
+    weights: product.weights,
     stock: product.stock,
     featured: product.featured,
     active: product.active,
@@ -136,9 +134,18 @@ function rowToProduct(row: Record<string, unknown>): Product {
     comparePrice: row.compare_price ? Number(row.compare_price) : undefined,
     category: String(row.category ?? "femme") as Product["category"],
     images: Array.isArray(row.images) ? row.images.map(String) : [],
-    sizes: Array.isArray(row.sizes) ? row.sizes.map(String) : [],
-    shoeSizes: Array.isArray(row.shoe_sizes) ? row.shoe_sizes.map(String) : [],
-    colors: Array.isArray(row.colors) ? row.colors.map(String) : [],
+    weights: Array.isArray(row.weights)
+      ? row.weights.map(String)
+      : Array.isArray(row.sizes)
+        ? row.sizes.map(String)
+        : [],
+    sizes: Array.isArray(row.weights)
+      ? row.weights.map(String)
+      : Array.isArray(row.sizes)
+        ? row.sizes.map(String)
+        : [],
+    shoeSizes: [],
+    colors: [],
     stock: Number(row.stock ?? 0),
     featured: Boolean(row.featured),
     active: Boolean(row.active),

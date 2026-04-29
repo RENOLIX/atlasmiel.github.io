@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import atlasLogo from "@/assets/atlas-logo.webp";
 
 export default function Intro({ onDone }: { onDone: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -36,6 +37,14 @@ export default function Intro({ onDone }: { onDone: () => void }) {
             ))}
           </div>
           <div className="relative z-10 text-center select-none">
+            <motion.img
+              src={atlasLogo}
+              alt="ATLAS"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15 }}
+              className="mx-auto mb-6 h-28 w-56 object-contain md:h-36 md:w-72"
+            />
             <div className="overflow-hidden">
               <motion.h1 initial={{ y: "110%" }} animate={{ y: "0%" }} transition={{ duration: 1.1, ease: [0.25, 0.1, 0.25, 1] as const, delay: 0.3 }} className="text-7xl md:text-9xl lg:text-[11rem] font-light text-white leading-none tracking-widest" style={{ fontFamily: "Cormorant Garamond, serif" }}>Atlas</motion.h1>
             </div>
