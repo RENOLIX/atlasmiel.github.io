@@ -1,10 +1,10 @@
 import { Suspense, useState } from "react";
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import ScrollToTop from "@/components/app/ScrollToTop";
 import { useAuth } from "@/components/providers/auth";
 import { DefaultProviders } from "@/components/providers/default";
 import LocaleWrapper from "@/components/providers/locale-wrapper";
-import { SAVED_OR_DEFAULT_LOCALE, setLocaleInPath } from "@/i18n";
+import { changeLocale, SAVED_OR_DEFAULT_LOCALE, setLocaleInPath } from "@/i18n";
 import "@/i18n";
 import AdminLayout from "@/pages/admin/layout";
 import AdminLoginPage from "@/pages/admin/login/page";
@@ -30,14 +30,31 @@ function AdminIndexRedirect() {
   return <Navigate to="/admin/login" replace />;
 }
 
+function IntroRedirect({ onDone }: { onDone: () => void }) {
+  const navigate = useNavigate();
+
+  return (
+    <Intro
+      onDone={() => {
+        void changeLocale("ar");
+        navigate("/ar", { replace: true });
+        onDone();
+      }}
+    />
+  );
+}
+
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
-  const basename = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL;
+  const basename =
+    import.meta.env.BASE_URL === "/"
+      ? undefined
+      : import.meta.env.BASE_URL.replace(/\/$/, "");
 
   return (
     <DefaultProviders>
-      {!introDone && <Intro onDone={() => setIntroDone(true)} />}
       <BrowserRouter basename={basename}>
+        {!introDone && <IntroRedirect onDone={() => setIntroDone(true)} />}
         <ScrollToTop />
         <Suspense fallback={<div />}>
           <Routes>
