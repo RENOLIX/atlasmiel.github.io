@@ -1,5 +1,13 @@
 import { Suspense, useState } from "react";
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import ScrollToTop from "@/components/app/ScrollToTop";
 import { useAuth } from "@/components/providers/auth";
 import { DefaultProviders } from "@/components/providers/default";
@@ -45,7 +53,6 @@ function IntroRedirect({ onDone }: { onDone: () => void }) {
 }
 
 export default function App() {
-  const [introDone, setIntroDone] = useState(false);
   const basename =
     import.meta.env.BASE_URL === "/"
       ? undefined
@@ -54,34 +61,47 @@ export default function App() {
   return (
     <DefaultProviders>
       <BrowserRouter basename={basename}>
-        {!introDone && <IntroRedirect onDone={() => setIntroDone(true)} />}
-        <ScrollToTop />
-        <Suspense fallback={<div />}>
-          <Routes>
-            <Route path="/" element={<Navigate to={setLocaleInPath(SAVED_OR_DEFAULT_LOCALE, "/")} replace />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/admin/login" element={<AdminLoginPage />} />
-            <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminIndexRedirect />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="products/new" element={<AdminProductEditorPage />} />
-              <Route path="products/:id" element={<AdminProductEditorPage />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-            </Route>
-            <Route path="/:lng" element={<LocaleWrapper><Outlet /></LocaleWrapper>}>
-              <Route index element={<Index />} />
-              <Route path="produits" element={<Produits />} />
-              <Route path="produits/:id" element={<ProduitDetail />} />
-              <Route path="histoire" element={<Histoire />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+        <AppRoutes />
       </BrowserRouter>
     </DefaultProviders>
+  );
+}
+
+function AppRoutes() {
+  const [introDone, setIntroDone] = useState(false);
+  const location = useLocation();
+  const isAdminArea =
+    location.pathname.startsWith("/admin") || location.pathname.startsWith("/auth");
+
+  return (
+    <>
+      {!introDone && !isAdminArea && <IntroRedirect onDone={() => setIntroDone(true)} />}
+      <ScrollToTop />
+      <Suspense fallback={<div />}>
+        <Routes>
+          <Route path="/" element={<Navigate to={setLocaleInPath(SAVED_OR_DEFAULT_LOCALE, "/")} replace />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminIndexRedirect />} />
+            <Route path="products" element={<AdminProductsPage />} />
+            <Route path="products/new" element={<AdminProductEditorPage />} />
+            <Route path="products/:id" element={<AdminProductEditorPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+          </Route>
+          <Route path="/:lng" element={<LocaleWrapper><Outlet /></LocaleWrapper>}>
+            <Route index element={<Index />} />
+            <Route path="produits" element={<Produits />} />
+            <Route path="produits/:id" element={<ProduitDetail />} />
+            <Route path="histoire" element={<Histoire />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </>
   );
 }
