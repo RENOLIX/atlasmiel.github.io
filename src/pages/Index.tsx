@@ -34,7 +34,8 @@ export default function Index() {
     <div className="min-h-screen bg-background" dir={isRtl ? "rtl" : "ltr"}>
       <Navbar />
       <section ref={heroRef} className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
-        <video ref={videoRef} autoPlay loop muted playsInline disablePictureInPicture disableRemotePlayback controlsList="nodownload nofullscreen noremoteplayback" onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
+        <img src={HONEY_COMB} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none" />
+        <video ref={videoRef} autoPlay loop muted playsInline preload="auto" poster={HONEY_COMB} disablePictureInPicture disableRemotePlayback controlsList="nodownload nofullscreen noremoteplayback" onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
           <source src="https://hercules-cdn.com/file_NQSHNKolyUHd1rSKPyeUGhai" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />

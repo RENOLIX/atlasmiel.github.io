@@ -32,11 +32,12 @@ function AdminIndexRedirect() {
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
+  const basename = import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL;
 
   return (
     <DefaultProviders>
       {!introDone && <Intro onDone={() => setIntroDone(true)} />}
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <ScrollToTop />
         <Suspense fallback={<div />}>
           <Routes>

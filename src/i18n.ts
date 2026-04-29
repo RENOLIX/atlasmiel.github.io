@@ -3,8 +3,7 @@ import { initReactI18next } from "react-i18next";
 
 export const SUPPORTED_LOCALES = ["fr", "ar", "en"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-export const SAVED_OR_DEFAULT_LOCALE: SupportedLocale =
-  (localStorage.getItem("atlas-locale") as SupportedLocale | null) ?? "fr";
+export const SAVED_OR_DEFAULT_LOCALE: SupportedLocale = "ar";
 
 export function isSupportedLocale(value: string): value is SupportedLocale {
   return SUPPORTED_LOCALES.includes(value as SupportedLocale);
@@ -22,7 +21,7 @@ export async function changeLocale(locale: SupportedLocale) {
   document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
 }
 
-const common = {
+const frCommon = {
       nav: { home: "Accueil", products: "Produits", history: "Histoire", contact: "Contact", order: "Commander" },
       footer: { tagline: "Miel naturel, pur et authentique issu des saveurs d'Algerie.", nav: "Navigation", contact: "Contact", rights: "ATLAS-Miel. Tous droits reserves.", pure: "Pur - Naturel - Algerien" },
       hero: { badge: "Miel naturel d'Algerie", title2: "Miel", subtitle: "Des miels purs, selectionnes avec soin, pour retrouver la richesse des terroirs algeriens.", "cta.products": "Voir les produits", "cta.history": "Notre histoire", scroll: "Defiler" },
@@ -44,16 +43,38 @@ const common = {
       }
 };
 
+const arCommon = {
+  nav: { home: "الرئيسية", products: "المنتجات", history: "قصتنا", contact: "اتصل بنا", order: "اطلب الآن" },
+  footer: { tagline: "عسل طبيعي، نقي وأصيل من خيرات الجزائر.", nav: "التصفح", contact: "التواصل", rights: "ATLAS-Miel. جميع الحقوق محفوظة.", pure: "نقي - طبيعي - جزائري" },
+  hero: { badge: "عسل طبيعي من الجزائر", title2: "العسل", subtitle: "عسل نقي مختار بعناية ليحمل غنى الطبيعة الجزائرية.", "cta.products": "عرض المنتجات", "cta.history": "قصتنا", scroll: "مرر" },
+  features: { natural: "طبيعي 100%", "natural.desc": "بدون إضافات أو مواد حافظة.", quality: "جودة مضمونة", "quality.desc": "اختيار دقيق ومراقب.", tradition: "خبرة أصيلة", "tradition.desc": "شغف متوارث.", taste: "مذاق غني", "taste.desc": "نكهات عميقة وطبيعية." },
+  honeyTypes: { title: "العسل ومنتجات الخلية", liquid: { title: "عسل طبيعي", desc: "قوام ذهبي ونكهة زهرية غنية، مختار باحترام للطبيعة." }, hive: { title: "منتجات الخلية", desc: "اختيارات طبيعية من العسل وخيرات الخلية." } },
+  products: { tag: "مختاراتنا", title: "أنواع العسل المميزة", viewAll: "عرض كل المنتجات", order: "اطلب", page: { badge: "المتجر", title: "منتجاتنا", subtitle: "اختر عسلك واطلب مباشرة عبر الموقع." } },
+  quote: { text: "العسل يحتفظ بذاكرة الأزهار.", author: "ATLAS-Miel" },
+  stats: { natural: "طبيعي", experience: "سنوات", varieties: "أنواع", clients: "زبائن" },
+  cta: { title: "تذوق الأصالة", desc: "اطلب عسلًا طبيعيًا واستلمه في مختلف ولايات الجزائر.", btn: "اطلب الآن" },
+  contact: { badge: "تواصل معنا", title: "اتصل بنا", subtitle: "لنتحدث عن العسل", desc: "لديك سؤال أو طلب خاص؟ أرسل لنا رسالة.", address: "العنوان", "address.val": "الجزائر العاصمة، الجزائر", phone: "الهاتف", email: "البريد الإلكتروني", name: "الاسم", message: "الرسالة", send: "إرسال", sending: "جار الإرسال...", success: "تم إرسال الرسالة بنجاح" },
+  history: { since: "منذ 2008", title: "قصتنا", timeline: "المسار", "y2008": "البدايات الأولى", "y2008.desc": "بدأ الشغف العائلي بالعسل الطبيعي.", "y2012": "اختيار محلي", "y2012.desc": "البحث عن أفضل المناطق والمصادر.", "y2016": "تعزيز الجودة", "y2016.desc": "تحسين المراقبة والتعبئة.", "y2020": "هوية جديدة", "y2020.desc": "أصبحت ATLAS-Miel علامة واضحة.", "y2024": "البيع عبر الإنترنت", "y2024.desc": "طلب سهل وتوصيل سريع.", heritage: { title1: "إرث", title2: "طبيعي", p1: "نختار العسل لنقائه وقوامه ومذاقه.", p2: "كل عبوة تحمل وعدًا بسيطًا: الأصالة، الشفافية والمتعة." } },
+  product: { back: "العودة إلى المنتجات", notfound: "المنتج غير موجود", "notfound.back": "رجوع", delivery: "التوصيل متوفر", payment: "الدفع عند الاستلام", order: { title: "اطلب هذا المنتج", name: "الاسم الكامل", phone: "الهاتف", wilaya: "الولاية", qty: "الكمية", address: "العنوان", total: "المجموع", submitting: "جار الإرسال...", submit: "تأكيد الطلب", note: "سيتصل بك فريقنا لتأكيد التوصيل.", success: { title: "تم استلام الطلب", desc: "شكرا لك. سنتواصل معك قريبا.", new: "طلب جديد" } } },
+  prod: {
+    montagne: { name: "عسل الجبال", desc: "عسل ذهبي بنكهة طبيعية غنية ومتوازنة.", tag: "مميز", origin: "الأطلس", b1: "غني بالنكهات", b2: "قوام ناعم", b3: "مثالي للفطور" },
+    jujubier: { name: "عسل السدر", desc: "عسل فاخر بمذاق عميق وطبيعي.", tag: "فاخر", origin: "الجنوب", b1: "مذاق قوي", b2: "محبوب جدا", b3: "عبوة 500غ" },
+    "toutes-fleurs": { name: "عسل الأزهار", desc: "عسل زهري لطيف مناسب لكل العائلة.", tag: "لطيف", origin: "المراعي", b1: "نكهة زهرية", b2: "للاستعمال اليومي", b3: "طبيعي" },
+    romarin: { name: "عسل إكليل الجبل", desc: "عسل فاتح بنفحات عشبية أنيقة.", tag: "عطري", origin: "التل", b1: "رائحة لطيفة", b2: "ممتاز مع الشاي", b3: "اختيار بعناية" },
+    thym: { name: "عسل الزعتر", desc: "عسل قوي ومعطر بطابع متوسطي.", tag: "قوي", origin: "الجبال", b1: "نكهات قوية", b2: "قوام كثيف", b3: "طابع مميز" },
+  },
+};
+
 const resources = {
-  fr: { common },
-  en: { common },
-  ar: { common },
+  fr: { common: frCommon },
+  en: { common: frCommon },
+  ar: { common: arCommon },
 };
 
 void i18n.use(initReactI18next).init({
   resources,
   lng: isSupportedLocale(SAVED_OR_DEFAULT_LOCALE) ? SAVED_OR_DEFAULT_LOCALE : "fr",
-  fallbackLng: "fr",
+  fallbackLng: "ar",
   defaultNS: "common",
   interpolation: { escapeValue: false },
 });
