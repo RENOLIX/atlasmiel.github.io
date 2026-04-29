@@ -18,8 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VITE_SUPABASE_URL: https://bebxavqifpvxefmjsgql.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uTZSWZ1BetBhIv0omfJ0Fg_HfsUnE78
+      VITE_SUPABASE_URL: https://uvvavukmbffwnecvfiys.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_cfSnUnFt19bnwLOqQ-l6Dg_Bei01S5Y
       VITE_PUBLIC_SITE_URL: https://renolix.github.io/atlasmiel.github.io/
     steps:
       - name: Checkout
