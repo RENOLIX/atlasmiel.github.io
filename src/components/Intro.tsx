@@ -5,6 +5,7 @@ import atlasLogo from "@/assets/atlas-logo.webp";
 export default function Intro({ onDone }: { onDone: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [leaving, setLeaving] = useState(false);
+  const introVideoSrc = `${import.meta.env.BASE_URL}videos/atlas-intro.mp4`;
 
   const dismiss = () => {
     if (leaving) return;
@@ -27,10 +28,10 @@ export default function Intro({ onDone }: { onDone: () => void }) {
     <AnimatePresence>
       {!leaving && (
         <motion.div key="intro" initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] as const }} className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden" onClick={dismiss}>
-          <video ref={videoRef} autoPlay playsInline muted loop={false} disablePictureInPicture disableRemotePlayback controlsList="nodownload nofullscreen noremoteplayback" onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
-            <source src="https://hercules-cdn.com/file_oT7acZg5vjbFCCyZ2McOUYS4" type="video/mp4" />
+          <video ref={videoRef} autoPlay playsInline muted loop={false} preload="auto" disablePictureInPicture disableRemotePlayback controlsList="nodownload nofullscreen noremoteplayback" onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
+            <source src={introVideoSrc} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/30" />
           <div className="absolute inset-0 pointer-events-none">
             {[12, 28, 50, 68, 85].map((left, i) => (
               <motion.div key={i} initial={{ y: "-20%", opacity: 0 }} animate={{ y: "110vh", opacity: [0, 0.7, 0.5, 0] }} transition={{ duration: 2.2 + i * 0.35, delay: 0.2 + i * 0.2, ease: "easeIn" as const, repeat: Infinity, repeatDelay: 1 + i * 0.3 }} className="absolute top-0 w-[2px] rounded-full bg-gradient-to-b from-[oklch(0.85_0.12_70)] to-transparent" style={{ left: `${left}%`, height: `${55 + i * 14}px` }} />
