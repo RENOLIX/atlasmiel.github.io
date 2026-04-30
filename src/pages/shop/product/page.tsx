@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/shop/Header";
@@ -7,6 +8,7 @@ import Footer from "@/components/shop/Footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { useShop } from "@/hooks/use-shop";
+import { formatDzd } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
 export default function ProductPage() {
@@ -14,6 +16,7 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const { getProductById } = useShop();
   const { addItem } = useCart();
+  const { i18n } = useTranslation("common");
   const product = id ? getProductById(id) : undefined;
 
   const [selectedSize, setSelectedSize] = useState("");
@@ -121,11 +124,11 @@ export default function ProductPage() {
             <h1 className="font-serif text-3xl font-bold mb-3">{product.name}</h1>
             <div className="flex items-center gap-3 mb-6">
               <span className="text-2xl font-semibold">
-                {product.price.toLocaleString("fr-DZ")} DZD
+                {formatDzd(product.price, i18n.language)}
               </span>
               {product.comparePrice && product.comparePrice > product.price ? (
                 <span className="text-lg text-muted-foreground line-through">
-                  {product.comparePrice.toLocaleString("fr-DZ")} DZD
+                  {formatDzd(product.comparePrice, i18n.language)}
                 </span>
               ) : null}
             </div>

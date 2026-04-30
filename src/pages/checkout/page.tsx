@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/hooks/use-cart";
 import { useShop } from "@/hooks/use-shop";
+import { formatDzd } from "@/lib/currency";
 import { formatProductSelections } from "@/lib/product-options";
 import {
   WILAYA_SHIPPING_RATES,
@@ -38,6 +40,7 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { createOrder } = useShop();
   const [loading, setLoading] = useState(false);
+  const { i18n } = useTranslation("common");
 
   const {
     register,
@@ -230,7 +233,7 @@ export default function CheckoutPage() {
                             }`}
                           >
                             {selectedWilaya
-                              ? `${currentPrice?.toLocaleString("fr-DZ")} DZD`
+                              ? formatDzd(currentPrice ?? 0, i18n.language)
                               : "Choisissez une wilaya"}
                           </p>
                         </div>
@@ -291,7 +294,7 @@ export default function CheckoutPage() {
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Traitement...
                 </>
               ) : (
-                `Confirmer - ${totalWithShipping.toLocaleString("fr-DZ")} DZD`
+                `Confirmer - ${formatDzd(totalWithShipping, i18n.language)}`
               )}
             </Button>
           </div>
@@ -323,7 +326,7 @@ export default function CheckoutPage() {
                     <p className="text-xs text-muted-foreground">Qte : {item.quantity}</p>
                   </div>
                   <p className="text-sm font-semibold shrink-0 whitespace-nowrap">
-                    {(item.price * item.quantity).toLocaleString("fr-DZ")} DZD
+                    {formatDzd(item.price * item.quantity, i18n.language)}
                   </p>
                 </div>
               ))}
@@ -332,13 +335,13 @@ export default function CheckoutPage() {
             <div className="border-t border-border pt-4 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Sous-total</span>
-                <span>{totalPrice.toLocaleString("fr-DZ")} DZD</span>
+                <span>{formatDzd(totalPrice, i18n.language)}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Livraison</span>
                 <span>
                   {selectedWilaya
-                    ? `${shippingPrice.toLocaleString("fr-DZ")} DZD`
+                    ? formatDzd(shippingPrice, i18n.language)
                     : "Choisissez une wilaya"}
                 </span>
               </div>
@@ -356,7 +359,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between font-bold text-base pt-2 border-t border-border">
                 <span>Total</span>
-                <span>{totalWithShipping.toLocaleString("fr-DZ")} DZD</span>
+                <span>{formatDzd(totalWithShipping, i18n.language)}</span>
               </div>
             </div>
 

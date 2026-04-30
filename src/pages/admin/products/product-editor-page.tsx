@@ -289,7 +289,7 @@ export default function AdminProductEditorPage() {
         </div>
 
         {!isNew && product ? (
-          <Link to={`/shop/product/${product.id}`} target="_blank" rel="noreferrer">
+          <Link to={`/ar/produits/${product.id}`} target="_blank" rel="noreferrer">
             <Button variant="outline" size="lg">
               <Eye className="h-4 w-4 mr-2" /> Voir la fiche produit
             </Button>

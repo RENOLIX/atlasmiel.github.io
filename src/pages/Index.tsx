@@ -20,6 +20,7 @@ import {
   PRODUCT_IMAGES,
   PRODUCT_PRICES,
 } from "@/pages/produits/data";
+import { formatDzd } from "@/lib/currency";
 import honeyLiquid from "@/assets/honey-liquid.png";
 import hiveProducts from "@/assets/hive-products.png";
 
@@ -259,7 +260,7 @@ export default function Index() {
                   {t(`prod.${id}.name`)}
                 </h3>
                 <p className="text-lg font-medium text-primary mt-2" style={{ fontFamily: "Montserrat, sans-serif" }}>
-                  {PRODUCT_PRICES[id].toLocaleString("fr-DZ")} DA
+                  {formatDzd(PRODUCT_PRICES[id], i18n.language)}
                 </p>
               </Link>
               </motion.div>

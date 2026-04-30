@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { formatDzd } from "@/lib/currency";
 import type { Product } from "@/types";
 
-function formatPrice(value: number) {
-  return value.toLocaleString("fr-DZ");
-}
-
 export default function ProductCard({ product }: { product: Product }) {
+  const { i18n } = useTranslation("common");
+
   return (
     <Link to={`/shop/product/${product.id}`} className="group block">
       <div className="aspect-[3/4] overflow-hidden bg-muted">
@@ -20,10 +20,10 @@ export default function ProductCard({ product }: { product: Product }) {
           {product.name}
         </h3>
         <div className="flex items-center gap-3 text-sm">
-          <span className="font-semibold">{formatPrice(product.price)} DZD</span>
+          <span className="font-semibold">{formatDzd(product.price, i18n.language)}</span>
           {product.comparePrice ? (
             <span className="text-muted-foreground line-through">
-              {formatPrice(product.comparePrice)} DZD
+              {formatDzd(product.comparePrice, i18n.language)}
             </span>
           ) : null}
         </div>

@@ -1,15 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
 import Header from "@/components/shop/Header";
 import Footer from "@/components/shop/Footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
+import { formatDzd } from "@/lib/currency";
 import { formatProductSelections } from "@/lib/product-options";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCart();
   const navigate = useNavigate();
+  const { i18n } = useTranslation("common");
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -58,7 +61,7 @@ export default function CartPage() {
                       {formatProductSelections(item)}
                     </p>
                     <p className="text-sm font-semibold mt-2">
-                      {item.price.toLocaleString("fr-DZ")} DZD
+                      {formatDzd(item.price, i18n.language)}
                     </p>
                     <div className="flex items-center gap-3 mt-4">
                       <button
@@ -115,7 +118,7 @@ export default function CartPage() {
                 <div className="space-y-3 text-sm mb-6">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Sous-total</span>
-                    <span>{totalPrice.toLocaleString("fr-DZ")} DZD</span>
+                    <span>{formatDzd(totalPrice, i18n.language)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Livraison</span>
@@ -124,7 +127,7 @@ export default function CartPage() {
                   <p className="text-xs text-muted-foreground">Paiement a la livraison</p>
                   <div className="border-t border-border pt-3 flex justify-between font-semibold text-base">
                     <span>Total</span>
-                    <span>{totalPrice.toLocaleString("fr-DZ")} DZD</span>
+                    <span>{formatDzd(totalPrice, i18n.language)}</span>
                   </div>
                 </div>
                 <Button size="lg" className="w-full" onClick={() => navigate("/checkout")}>
