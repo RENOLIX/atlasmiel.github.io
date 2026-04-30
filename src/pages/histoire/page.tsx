@@ -5,6 +5,23 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { HONEY_COMB, MOUNTAIN } from "@/pages/produits/data";
 
+const honeyAccent = "#ffa700";
+
+const sectionReveal = {
+  hidden: { opacity: 0, y: 42 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
+
+const staggerReveal = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12 } },
+};
+
+const itemReveal = {
+  hidden: { opacity: 0, y: 26 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
+
 export default function Histoire() {
   const { t, i18n } = useTranslation("common");
   const isRtl = i18n.dir() === "rtl";
@@ -59,65 +76,83 @@ export default function Histoire() {
         </motion.div>
       </section>
 
-      <section className="py-20 bg-[oklch(0.97_0.04_75)]">
+      <motion.section
+        className="py-20 bg-[oklch(0.97_0.04_75)]"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="max-w-6xl mx-auto px-6">
-          <div className="bg-white border border-[oklch(0.88_0.04_75)] grid grid-cols-1 md:grid-cols-3 gap-px mb-16 shadow-sm">
+          <motion.div className="bg-white border border-[oklch(0.88_0.04_75)] grid grid-cols-1 md:grid-cols-3 gap-px mb-16 shadow-sm" variants={staggerReveal}>
             {pillars.map((pillar) => (
-              <div key={pillar.title} className="bg-white px-8 py-8 flex items-center justify-center gap-4 text-center">
+              <motion.div key={pillar.title} variants={itemReveal} whileHover={{ y: -4 }} className="bg-white px-8 py-8 flex items-center justify-center gap-4 text-center">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <pillar.icon size={22} strokeWidth={1.6} />
                 </div>
-                <h3 className="text-2xl font-light text-foreground" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+                <h3 className="text-2xl font-semibold" style={{ color: honeyAccent }}>
                   {pillar.title}
                 </h3>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="max-w-3xl mx-auto text-center">
+          <motion.div className="max-w-3xl mx-auto text-center" variants={itemReveal}>
             <span className="text-xs tracking-widest uppercase text-primary opacity-70 mb-4 block" style={{ fontFamily: "Montserrat, sans-serif" }}>
               {isArabic ? "من نحن" : "A PROPOS"}
             </span>
-            <h2 className="text-4xl md:text-5xl font-light text-foreground mb-8" style={{ fontFamily: "Cormorant Garamond, serif" }}>
-              {isArabic ? "أطلس - عسل طبيعي وأصيل" : "L'authenticite avant tout"}
+            <h2 className="text-4xl md:text-5xl font-semibold text-foreground mb-8">
+              {isArabic ? (
+                <>
+                  <span style={{ color: honeyAccent }}>أطلس</span> - عسل طبيعي وأصيل
+                </>
+              ) : (
+                "L'authenticite avant tout"
+              )}
             </h2>
             <div className="space-y-5 text-muted-foreground leading-loose" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.92rem" }}>
               {aboutParagraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mt-16 bg-white border border-[oklch(0.88_0.04_75)] grid grid-cols-1 md:grid-cols-3 gap-px text-center">
-            <div className="bg-white py-10 px-6">
+          <motion.div className="mt-16 bg-white border border-[oklch(0.88_0.04_75)] grid grid-cols-1 md:grid-cols-3 gap-px text-center" variants={staggerReveal}>
+            <motion.div variants={itemReveal} className="bg-white py-10 px-6">
               <p className="text-xs tracking-widest uppercase text-muted-foreground mb-3" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.68rem" }}>
                 {isArabic ? "من منتجات الخلية" : "Produits de la ruche"}
               </p>
-              <p className="text-6xl font-light text-primary leading-none" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+              <p className="text-6xl font-semibold text-primary leading-none">
                 +5
               </p>
-            </div>
-            <div className="bg-white py-10 px-6">
+            </motion.div>
+            <motion.div variants={itemReveal} className="bg-white py-10 px-6">
               <p className="text-xs tracking-widest uppercase text-muted-foreground mb-3" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.68rem" }}>
                 {isArabic ? "من أنواع العسل" : "Varietes de miel"}
               </p>
-              <p className="text-6xl font-light text-primary leading-none" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+              <p className="text-6xl font-semibold text-primary leading-none">
                 +14
               </p>
-            </div>
-            <div className="bg-white py-10 px-6 flex flex-col items-center justify-center">
+            </motion.div>
+            <motion.div variants={itemReveal} className="bg-white py-10 px-6 flex flex-col items-center justify-center">
               <ShieldCheck size={28} className="text-primary mb-4" strokeWidth={1.6} />
               <p className="text-muted-foreground leading-relaxed" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.86rem" }}>
                 {isArabic
                   ? "نحن علامة تجارية متخصصة في تقديم عسل طبيعي 100% ، نحرص على اختيار أجود الأنواع من مصادر موثوقة لنقدم لكم منتجًا نقيًا وصحيًا"
                   : "Nous sommes une marque specialisee dans le miel 100% naturel, choisi aupres de sources fiables pour offrir un produit pur et sain."}
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="py-24 max-w-5xl mx-auto px-6">
+      <motion.section
+        className="py-24 max-w-5xl mx-auto px-6"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-24">
           <div>
             <h2 className="text-4xl md:text-5xl font-light mb-6 text-foreground" style={{ fontFamily: "Cormorant Garamond, serif" }}>
@@ -155,7 +190,7 @@ export default function Histoire() {
             </div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       <Footer />
     </div>

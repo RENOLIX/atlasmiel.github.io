@@ -7,7 +7,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Cormorant Garamond", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-serif: "Cormorant Garamond", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --radius-sm: calc(var(--radius) - 4px);
@@ -81,6 +81,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body *:not(svg):not(svg *) {
+    font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif !important;
   }
 
   .admin-font,

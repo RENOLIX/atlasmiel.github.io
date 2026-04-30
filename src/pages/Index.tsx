@@ -4,8 +4,6 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowRight,
   Award,
-  Droplets,
-  Flower2,
   Leaf,
   Shield,
   ShieldCheck,
@@ -22,6 +20,25 @@ import {
   PRODUCT_IMAGES,
   PRODUCT_PRICES,
 } from "@/pages/produits/data";
+import honeyLiquid from "@/assets/honey-liquid.png";
+import hiveProducts from "@/assets/hive-products.png";
+
+const honeyAccent = "#ffa700";
+
+const sectionReveal = {
+  hidden: { opacity: 0, y: 44 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
+
+const staggerReveal = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12 } },
+};
+
+const itemReveal = {
+  hidden: { opacity: 0, y: 26 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
 
 export default function Index() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -42,8 +59,8 @@ export default function Index() {
   ];
 
   const honeyTypes = [
-    { icon: Droplets, title: t("honeyTypes.liquid.title"), desc: t("honeyTypes.liquid.desc") },
-    { icon: Flower2, title: t("honeyTypes.hive.title"), desc: t("honeyTypes.hive.desc") },
+    { image: honeyLiquid, title: t("honeyTypes.liquid.title"), desc: t("honeyTypes.liquid.desc") },
+    { image: hiveProducts, title: t("honeyTypes.hive.title"), desc: t("honeyTypes.hive.desc") },
   ];
 
   const testimonials = [
@@ -135,10 +152,16 @@ export default function Index() {
         </motion.div>
       </section>
 
-      <section className="bg-[oklch(0.2_0.04_45)] py-10">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <motion.section
+        className="bg-[oklch(0.2_0.04_45)] py-10"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
+        <motion.div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8" variants={staggerReveal}>
           {features.map((feature) => (
-            <div key={feature.label} className="flex flex-col items-center text-center gap-3">
+            <motion.div key={feature.label} variants={itemReveal} className="flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-full border border-[oklch(0.72_0.16_68)]/40">
                 <feature.icon size={20} className="text-[oklch(0.75_0.15_70)]" />
               </div>
@@ -148,30 +171,47 @@ export default function Index() {
               <p className="text-xs text-white/50 leading-relaxed hidden md:block" style={{ fontFamily: "Montserrat, sans-serif" }}>
                 {feature.desc}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
-      <section className="py-24 bg-[oklch(0.97_0.02_80)]">
+      <motion.section
+        className="py-24 bg-[oklch(0.97_0.02_80)]"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-xs tracking-widest uppercase text-primary opacity-70 mb-4 block" style={{ fontFamily: "Montserrat, sans-serif" }}>
               ATLAS-Miel
             </span>
-            <h2 className="text-5xl md:text-6xl font-light text-foreground" style={{ fontFamily: "Cormorant Garamond, serif" }}>
-              {t("honeyTypes.title")}
+            <h2 className="text-5xl md:text-6xl font-semibold text-foreground">
+              {i18n.language === "ar" ? (
+                <>
+                  <span style={{ color: honeyAccent }}>العسل</span> ومنتجات الخلية
+                </>
+              ) : (
+                t("honeyTypes.title")
+              )}
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-10" variants={staggerReveal}>
             {honeyTypes.map((item) => (
-              <div key={item.title} className="group relative bg-white border border-[oklch(0.88_0.04_75)] p-8 md:p-10 hover:border-primary/40 transition-all duration-500 hover:shadow-xl">
+              <motion.div
+                key={item.title}
+                variants={itemReveal}
+                whileHover={{ y: -6 }}
+                className="group relative bg-white border border-[oklch(0.88_0.04_75)] p-8 md:p-10 hover:border-primary/40 transition-all duration-500 hover:shadow-xl"
+              >
                 <div className="flex flex-col sm:flex-row items-start gap-6">
-                  <div className="shrink-0 p-4 border border-[oklch(0.72_0.16_68)]/30 bg-[oklch(0.97_0.04_78)]">
-                    <item.icon size={28} className="text-[oklch(0.55_0.18_55)]" />
+                  <div className="shrink-0 w-28 h-28 md:w-32 md:h-32 border border-[oklch(0.72_0.16_68)]/30 bg-[oklch(0.99_0.02_86)] overflow-hidden flex items-center justify-center">
+                    <img src={item.image} alt={item.title} className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-110" />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-light text-foreground mb-4" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+                    <h3 className="text-3xl font-semibold text-foreground mb-4">
                       {item.title}
                     </h3>
                     <p className="text-muted-foreground leading-relaxed" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.85rem" }}>
@@ -179,13 +219,19 @@ export default function Index() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="py-24 bg-muted/30">
+      <motion.section
+        className="py-24 bg-muted/30"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-xs tracking-widest uppercase text-primary opacity-70 mb-4 block" style={{ fontFamily: "Montserrat, sans-serif" }}>
@@ -195,9 +241,10 @@ export default function Index() {
               {t("products.title")}
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={staggerReveal}>
             {PRODUCT_IDS.slice(0, 3).map((id) => (
-              <Link key={id} to={`${prefix}/produits/${id}`} className="group block">
+              <motion.div key={id} variants={itemReveal} whileHover={{ y: -6 }}>
+              <Link to={`${prefix}/produits/${id}`} className="group block">
                 <div className="overflow-hidden aspect-[4/5] mb-5">
                   <img
                     src={id === "montagne" ? HONEY_DRIP : id === "jujubier" ? PRODUCT_IMAGES[id] : JAR_IMG}
@@ -215,8 +262,9 @@ export default function Index() {
                   {PRODUCT_PRICES[id].toLocaleString("fr-DZ")} DA
                 </p>
               </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           <div className="text-center mt-14">
             <Link
               to={`${prefix}/produits`}
@@ -228,9 +276,15 @@ export default function Index() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="bg-white text-foreground py-8 border-y border-[oklch(0.88_0.04_75)]">
+      <motion.section
+        className="bg-white text-foreground py-8 border-y border-[oklch(0.88_0.04_75)]"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-center">
           <p className="text-2xl md:text-3xl font-light text-primary" style={{ fontFamily: "Cormorant Garamond, serif" }}>
             {t("trust.natural")}
@@ -242,18 +296,24 @@ export default function Index() {
             {t("trust.delivery")}
           </p>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="py-20 bg-[oklch(0.98_0.015_85)]">
+      <motion.section
+        className="py-20 bg-[oklch(0.98_0.015_85)]"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-5xl md:text-6xl font-light text-foreground" style={{ fontFamily: "Cormorant Garamond, serif" }}>
               {t("testimonials.title")}
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6" variants={staggerReveal}>
             {testimonials.map((testimonial) => (
-              <div key={testimonial.name} className="bg-white border border-[oklch(0.88_0.04_75)] p-8">
+              <motion.div key={testimonial.name} variants={itemReveal} whileHover={{ y: -5 }} className="bg-white border border-[oklch(0.88_0.04_75)] p-8">
                 <div className="flex items-center gap-1 text-primary mb-5">
                   {[0, 1, 2, 3, 4].map((star) => (
                     <Star key={star} size={15} fill="currentColor" />
@@ -265,13 +325,19 @@ export default function Index() {
                 <p className="text-primary text-lg font-light" style={{ fontFamily: "Cormorant Garamond, serif" }}>
                   {testimonial.name}
                 </p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="py-24 bg-primary text-primary-foreground">
+      <motion.section
+        className="py-24 bg-primary text-primary-foreground"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={sectionReveal}
+      >
         <div className="text-center max-w-2xl mx-auto px-6">
           <h2 className="text-5xl md:text-6xl font-light mb-6" style={{ fontFamily: "Cormorant Garamond, serif" }}>
             {t("cta.title")}
@@ -288,7 +354,7 @@ export default function Index() {
             <ArrowRight size={16} className={isRtl ? "rotate-180" : ""} />
           </Link>
         </div>
-      </section>
+      </motion.section>
 
       <Footer />
     </div>
