@@ -16,7 +16,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -27,18 +27,21 @@ export default function Navbar() {
     { label: t("nav.history"), href: `${prefix}/histoire` },
     { label: t("nav.contact"), href: `${prefix}/contact` },
   ];
+
   const activePath = location.pathname.replace(/^\/(ar|fr|en)/, "") || "/";
+  const isHome = activePath === "/";
+  const isTransparent = isHome && !scrolled && !menuOpen;
 
   return (
     <>
       <motion.nav
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] as const }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? "bg-[oklch(0.98_0.015_85)]/95 backdrop-blur-md shadow-sm border-b border-[oklch(0.88_0.04_75)]"
-            : "bg-transparent"
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.12 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-150 ${
+          isTransparent
+            ? "bg-transparent"
+            : "bg-[oklch(0.98_0.015_85)]/95 backdrop-blur-md shadow-sm border-b border-[oklch(0.88_0.04_75)]"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -50,41 +53,39 @@ export default function Navbar() {
             {links.map((link) => {
               const linkPath = link.href.replace(/^\/(ar|fr|en)/, "") || "/";
               const isActive = activePath === linkPath || (linkPath !== "/" && activePath.startsWith(linkPath));
+
               return (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-sm tracking-widest uppercase transition-all duration-200 relative group ${
-                    scrolled
-                      ? isActive
+                  className={`text-sm tracking-widest uppercase transition-colors duration-150 ${
+                    isTransparent
+                      ? "text-white/90 hover:text-white"
+                      : isActive
                         ? "text-primary"
                         : "text-foreground hover:text-primary"
-                      : "text-white/90 hover:text-white"
                   }`}
                   style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.72rem" }}
                 >
                   {link.label}
-                  <span className={`absolute -bottom-1 left-0 h-px bg-current transition-all duration-300 ${
-                    scrolled ? (isActive ? "w-full" : "w-0 group-hover:w-full") : "w-0"
-                  }`} />
                 </Link>
               );
             })}
             <Link
               to={`${prefix}/produits`}
-              className="px-5 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase transition-all duration-200 hover:bg-primary/80"
+              className="px-5 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase transition-colors duration-150 hover:bg-primary/80"
               style={{ fontFamily: "Montserrat, sans-serif" }}
             >
               {t("nav.order")}
             </Link>
-            <LocaleSwitcher inverted={!scrolled} />
+            <LocaleSwitcher inverted={isTransparent} />
           </div>
 
           <div className="md:hidden flex items-center gap-2">
-            <LocaleSwitcher inverted={!scrolled} />
+            <LocaleSwitcher inverted={isTransparent} />
             <button
-              className={scrolled ? "text-foreground" : "text-white"}
-              onClick={() => setMenuOpen(!menuOpen)}
+              className={isTransparent ? "text-white" : "text-foreground"}
+              onClick={() => setMenuOpen((open) => !open)}
               aria-label="Menu"
             >
               {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -96,10 +97,10 @@ export default function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.18 }}
             className="fixed top-16 left-0 right-0 z-40 bg-[oklch(0.98_0.015_85)] border-b border-border shadow-lg md:hidden"
           >
             <div className="flex flex-col py-4">

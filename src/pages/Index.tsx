@@ -230,15 +230,15 @@ export default function Index() {
         </div>
       </section>
 
-      <section className="bg-[oklch(0.2_0.04_45)] text-white py-8">
+      <section className="bg-white text-foreground py-8 border-y border-[oklch(0.88_0.04_75)]">
         <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-center">
-          <p className="text-2xl md:text-3xl font-light text-[oklch(0.85_0.12_70)]" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+          <p className="text-2xl md:text-3xl font-light text-primary" style={{ fontFamily: "Cormorant Garamond, serif" }}>
             {t("trust.natural")}
           </p>
-          <div className="w-16 h-16 rounded-full border border-[oklch(0.85_0.12_70)]/60 flex items-center justify-center bg-white/5">
-            <ShieldCheck size={30} className="text-[oklch(0.85_0.12_70)]" strokeWidth={1.6} />
+          <div className="w-16 h-16 rounded-full border border-primary/30 flex items-center justify-center bg-primary/5">
+            <ShieldCheck size={30} className="text-primary" strokeWidth={1.6} />
           </div>
-          <p className="text-2xl md:text-3xl font-light text-[oklch(0.85_0.12_70)]" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+          <p className="text-2xl md:text-3xl font-light text-primary" style={{ fontFamily: "Cormorant Garamond, serif" }}>
             {t("trust.delivery")}
           </p>
         </div>
