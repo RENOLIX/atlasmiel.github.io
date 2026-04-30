@@ -55,12 +55,18 @@ export default function Navbar() {
                   key={link.href}
                   to={link.href}
                   className={`text-sm tracking-widest uppercase transition-all duration-200 relative group ${
-                    scrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                  } ${isActive ? "text-primary" : ""}`}
+                    scrolled
+                      ? isActive
+                        ? "text-primary"
+                        : "text-foreground hover:text-primary"
+                      : "text-white/90 hover:text-white"
+                  }`}
                   style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.72rem" }}
                 >
                   {link.label}
-                  <span className={`absolute -bottom-1 left-0 h-px bg-current transition-all duration-300 ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                  <span className={`absolute -bottom-1 left-0 h-px bg-current transition-all duration-300 ${
+                    scrolled ? (isActive ? "w-full" : "w-0 group-hover:w-full") : "w-0"
+                  }`} />
                 </Link>
               );
             })}
