@@ -9,6 +9,7 @@ create table if not exists public.products (
   category text not null check (category in ('nouveautes', 'femme', 'homme', 'accessoires')),
   images text[] not null default '{}',
   weight_prices jsonb not null default '{}'::jsonb,
+  weight_compare_prices jsonb not null default '{}'::jsonb,
   weights text[] not null default '{500g,1kg}',
   stock integer not null default 0,
   featured boolean not null default false,
@@ -25,6 +26,12 @@ add column if not exists weight_prices jsonb not null default '{}'::jsonb;
 
 update public.products
 set weight_prices = coalesce(weight_prices, '{}'::jsonb);
+
+alter table public.products
+add column if not exists weight_compare_prices jsonb not null default '{}'::jsonb;
+
+update public.products
+set weight_compare_prices = coalesce(weight_compare_prices, '{}'::jsonb);
 
 alter table public.products
 drop column if exists shoe_sizes;

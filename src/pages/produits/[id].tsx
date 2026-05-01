@@ -12,7 +12,7 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/shop-store";
 import { formatDzd } from "@/lib/currency";
-import { getWeightPrice } from "@/lib/product-pricing";
+import { getWeightComparePrice, getWeightPrice } from "@/lib/product-pricing";
 import {
   HONEY_COMB,
   HONEY_DIPPER,
@@ -21,6 +21,7 @@ import {
   JAR_IMG,
   PRODUCT_IDS,
   PRODUCT_PRICES,
+  PRODUCT_WEIGHT_COMPARE_PRICES,
   PRODUCT_WEIGHT_PRICES,
   type ProductId,
 } from "@/pages/produits/data";
@@ -240,10 +241,10 @@ export default function ProduitDetail() {
   const productDesc = staticId ? t(`prod.${staticId}.desc`) : storedProduct?.description ?? "";
   const productTag = staticId ? t(`prod.${staticId}.tag`) : "ATLAS";
   const productOrigin = staticId ? t(`prod.${staticId}.origin`) : "Atlas";
-  const comparePrice = storedProduct?.comparePrice;
   const basePrice = storedProduct?.price ?? (staticId ? PRODUCT_PRICES[staticId] : 0);
   const weights = (storedProduct?.weights?.length ? storedProduct.weights : ["500g", "1kg"]);
   const weightPrices = storedProduct?.weightPrices ?? (staticId ? PRODUCT_WEIGHT_PRICES[staticId] : {});
+  const weightComparePrices = storedProduct?.weightComparePrices ?? (staticId ? PRODUCT_WEIGHT_COMPARE_PRICES[staticId] : {});
   const images = uniqueImages(storedProduct?.images?.length ? storedProduct.images : staticId ? STATIC_GALLERIES[staticId] : []);
 
   const { register, handleSubmit, watch, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormInput, unknown, FormValues>({
@@ -260,6 +261,7 @@ export default function ProduitDetail() {
   const wilaya = String(watch("wilaya") || "");
   const deliveryMethod = (watch("deliveryMethod") || "domicile") as DeliveryMethod;
   const price = getWeightPrice({ price: basePrice, weightPrices }, selectedWeight);
+  const comparePrice = getWeightComparePrice({ comparePrice: storedProduct?.comparePrice, weightComparePrices }, selectedWeight);
   const subtotal = price * quantity;
   const isFreeShipping = subtotal >= 6000;
   const shipping = wilaya ? (isFreeShipping ? 0 : DELIVERY_PRICES[wilaya]?.[deliveryMethod] ?? 0) : 0;
@@ -416,6 +418,11 @@ export default function ProduitDetail() {
                       <span className="mt-1 block text-sm font-extrabold">
                         {formatDzd(getWeightPrice({ price: basePrice, weightPrices }, weight), i18n.language)}
                       </span>
+                      {getWeightComparePrice({ comparePrice: storedProduct?.comparePrice, weightComparePrices }, weight) > getWeightPrice({ price: basePrice, weightPrices }, weight) ? (
+                        <span className="mt-1 block text-xs font-bold text-muted-foreground line-through">
+                          {formatDzd(getWeightComparePrice({ comparePrice: storedProduct?.comparePrice, weightComparePrices }, weight), i18n.language)}
+                        </span>
+                      ) : null}
                     </button>
                   ))}
                 </div>

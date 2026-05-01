@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type PropsWithChildren,
 } from "react";
@@ -102,6 +103,7 @@ function generateOrderNumber() {
 
 function normalizeProductDraft(draft: ProductDraft) {
   const draftWeightPrices = draft.weightPrices ?? {};
+  const draftWeightComparePrices = draft.weightComparePrices ?? {};
   const weights = draft.weights.length ? draft.weights : Object.keys(draftWeightPrices);
   const firstWeightPrice = weights
     .map((weight) => Number(draftWeightPrices[weight] || 0))
@@ -114,6 +116,14 @@ function normalizeProductDraft(draft: ProductDraft) {
       const price = Number(draftWeightPrices[weight] || 0);
       if (price > 0) {
         prices[weight] = price;
+      }
+      return prices;
+    }, {}),
+    weightComparePrices: weights.reduce<Record<string, number>>((prices, weight) => {
+      const comparePrice = Number(draftWeightComparePrices[weight] || 0);
+      const price = Number(draftWeightPrices[weight] || 0);
+      if (comparePrice > price) {
+        prices[weight] = comparePrice;
       }
       return prices;
     }, {}),
@@ -134,6 +144,7 @@ function productToRow(product: Product) {
     category: product.category,
     images: product.images,
     weight_prices: product.weightPrices ?? {},
+    weight_compare_prices: product.weightComparePrices ?? {},
     weights: product.weights,
     stock: product.stock,
     featured: product.featured,
@@ -153,8 +164,23 @@ function parseWeightPrices(value: unknown, weights: string[], fallbackPrice: num
   }, {});
 }
 
+function parseWeightComparePrices(value: unknown, weights: string[], fallbackComparePrice?: number) {
+  const input = value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+  return weights.reduce<Record<string, number>>((prices, weight) => {
+    const comparePrice = Number(input[weight] ?? fallbackComparePrice ?? 0);
+    if (comparePrice > 0) {
+      prices[weight] = comparePrice;
+    }
+    return prices;
+  }, {});
+}
+
 function rowToProduct(row: Record<string, unknown>): Product {
   const fallbackPrice = Number(row.price ?? 0);
+  const fallbackComparePrice = row.compare_price ? Number(row.compare_price) : undefined;
   const weights = Array.isArray(row.weights)
     ? row.weights.map(String)
     : Array.isArray(row.sizes)
@@ -166,10 +192,11 @@ function rowToProduct(row: Record<string, unknown>): Product {
     name: String(row.name ?? ""),
     description: String(row.description ?? ""),
     price: fallbackPrice,
-    comparePrice: row.compare_price ? Number(row.compare_price) : undefined,
+    comparePrice: fallbackComparePrice,
     category: String(row.category ?? "femme") as Product["category"],
     images: Array.isArray(row.images) ? row.images.map(String) : [],
     weightPrices: parseWeightPrices(row.weight_prices, weights, fallbackPrice),
+    weightComparePrices: parseWeightComparePrices(row.weight_compare_prices, weights, fallbackComparePrice),
     weights,
     sizes: weights,
     shoeSizes: [],
@@ -213,6 +240,8 @@ export function StoreProvider({ children }: PropsWithChildren) {
   const [orders, setOrders] = usePersistentState<Order[]>(ORDERS_KEY, () => []);
   const [items, setItems] = usePersistentState<CartItem[]>(CART_KEY, () => []);
   const [seedAttempted, setSeedAttempted] = useState(false);
+  const productsLoadedRef = useRef(false);
+  const ordersLoadedRef = useRef(false);
 
   useEffect(() => {
     const validIds = new Set(products.map((product) => product.id));
@@ -247,9 +276,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const fetchOrders = useCallback(async () => {
     if (!hasSupabaseConfig || !supabase || !canManageOrders) {
-      if (hasSupabaseConfig) {
-        setOrders([]);
-      }
       return;
     }
 
@@ -272,7 +298,10 @@ export function StoreProvider({ children }: PropsWithChildren) {
     }
 
     const client = supabase;
-    void fetchProducts();
+    if (!productsLoadedRef.current) {
+      productsLoadedRef.current = true;
+      void fetchProducts();
+    }
 
     const channel = client
       .channel("products-sync")
@@ -296,10 +325,14 @@ export function StoreProvider({ children }: PropsWithChildren) {
     }
 
     const client = supabase;
-    void fetchOrders();
 
     if (!canManageOrders) {
       return;
+    }
+
+    if (!ordersLoadedRef.current) {
+      ordersLoadedRef.current = true;
+      void fetchOrders();
     }
 
     const channel = client

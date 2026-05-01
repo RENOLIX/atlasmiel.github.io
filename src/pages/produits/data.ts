@@ -32,3 +32,11 @@ export const PRODUCT_WEIGHT_PRICES: Record<ProductId, Record<string, number>> = 
   romarin: { "500g": 2200, "1kg": 4200 },
   thym: { "500g": 2800, "1kg": 5400 },
 };
+
+export const PRODUCT_WEIGHT_COMPARE_PRICES: Record<ProductId, Record<string, number>> = {
+  montagne: {},
+  jujubier: {},
+  "toutes-fleurs": {},
+  romarin: {},
+  thym: {},
+};

@@ -17,10 +17,11 @@ const PRESET_WEIGHTS = ["500g", "1kg"];
 const EMPTY_FORM = {
   name: "",
   description: "",
-  comparePrice: "",
   images: [] as string[],
   weights: "500g,1kg",
   weightPrices: { "500g": "", "1kg": "" } as Record<string, string>,
+  weightComparePrices: {} as Record<string, string>,
+  weightCompareEnabled: {} as Record<string, boolean>,
   stock: "10",
   featured: false,
   active: true,
@@ -46,6 +47,29 @@ function getFormWeightPrices(weights: string[], prices: Record<string, number> |
     const price = Number(prices?.[weight] ?? fallbackPrice);
     nextPrices[weight] = price > 0 ? String(price) : "";
     return nextPrices;
+  }, {});
+}
+
+function getFormWeightComparePrices(
+  weights: string[],
+  prices: Record<string, number> | undefined,
+  fallbackPrice?: number,
+) {
+  return weights.reduce<Record<string, string>>((nextPrices, weight) => {
+    const price = Number(prices?.[weight] ?? fallbackPrice ?? 0);
+    nextPrices[weight] = price > 0 ? String(price) : "";
+    return nextPrices;
+  }, {});
+}
+
+function getFormWeightCompareEnabled(
+  weights: string[],
+  prices: Record<string, number> | undefined,
+  fallbackPrice?: number,
+) {
+  return weights.reduce<Record<string, boolean>>((enabled, weight) => {
+    enabled[weight] = Number(prices?.[weight] ?? fallbackPrice ?? 0) > 0;
+    return enabled;
   }, {});
 }
 
@@ -131,10 +155,11 @@ export default function AdminProductEditorPage() {
     setForm({
       name: product.name,
       description: product.description,
-      comparePrice: product.comparePrice ? String(product.comparePrice) : "",
       images: product.images,
       weights: product.weights.join(","),
       weightPrices: getFormWeightPrices(product.weights, product.weightPrices, product.price),
+      weightComparePrices: getFormWeightComparePrices(product.weights, product.weightComparePrices, product.comparePrice),
+      weightCompareEnabled: getFormWeightCompareEnabled(product.weights, product.weightComparePrices, product.comparePrice),
       stock: String(product.stock),
       featured: product.featured,
       active: product.active,
@@ -212,6 +237,14 @@ export default function AdminProductEditorPage() {
           prices[entry] = current.weightPrices[entry] ?? "";
           return prices;
         }, {}),
+        weightComparePrices: normalizeWeights(nextWeights).reduce<Record<string, string>>((prices, entry) => {
+          prices[entry] = current.weightComparePrices[entry] ?? "";
+          return prices;
+        }, {}),
+        weightCompareEnabled: normalizeWeights(nextWeights).reduce<Record<string, boolean>>((enabled, entry) => {
+          enabled[entry] = current.weightCompareEnabled[entry] ?? false;
+          return enabled;
+        }, {}),
       };
     });
   };
@@ -229,6 +262,14 @@ export default function AdminProductEditorPage() {
           prices[entry] = current.weightPrices[entry] ?? "";
           return prices;
         }, {}),
+        weightComparePrices: normalizeWeights([...selectedPresets, ...parseCsv(value)]).reduce<Record<string, string>>((prices, entry) => {
+          prices[entry] = current.weightComparePrices[entry] ?? "";
+          return prices;
+        }, {}),
+        weightCompareEnabled: normalizeWeights([...selectedPresets, ...parseCsv(value)]).reduce<Record<string, boolean>>((enabled, entry) => {
+          enabled[entry] = current.weightCompareEnabled[entry] ?? false;
+          return enabled;
+        }, {}),
       };
     });
   };
@@ -240,6 +281,32 @@ export default function AdminProductEditorPage() {
         ...current.weightPrices,
         [weight]: value,
       },
+    }));
+  };
+
+  const handleWeightComparePriceChange = (weight: string, value: string) => {
+    setForm((current) => ({
+      ...current,
+      weightComparePrices: {
+        ...current.weightComparePrices,
+        [weight]: value,
+      },
+    }));
+  };
+
+  const handleWeightCompareEnabledChange = (weight: string, checked: boolean) => {
+    setForm((current) => ({
+      ...current,
+      weightCompareEnabled: {
+        ...current.weightCompareEnabled,
+        [weight]: checked,
+      },
+      weightComparePrices: checked
+        ? current.weightComparePrices
+        : {
+            ...current.weightComparePrices,
+            [weight]: "",
+          },
     }));
   };
 
@@ -268,16 +335,43 @@ export default function AdminProductEditorPage() {
       return;
     }
 
+    const weightComparePrices = weights.reduce<Record<string, number>>((prices, weight) => {
+      if (!form.weightCompareEnabled[weight]) {
+        return prices;
+      }
+
+      const comparePrice = Number(form.weightComparePrices[weight] || 0);
+      if (comparePrice > 0) {
+        prices[weight] = comparePrice;
+      }
+      return prices;
+    }, {});
+
+    const invalidComparePrice = weights.find((weight) => {
+      if (!form.weightCompareEnabled[weight]) {
+        return false;
+      }
+
+      const comparePrice = Number(form.weightComparePrices[weight] || 0);
+      return comparePrice <= weightPrices[weight];
+    });
+
+    if (invalidComparePrice) {
+      toast.error(`Prix barre requis et superieur au prix normal pour ${invalidComparePrice}.`);
+      return;
+    }
+
     setSaving(true);
 
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
       price: getFirstWeightPrice(weights, form.weightPrices),
-      comparePrice: form.comparePrice ? Number(form.comparePrice) : undefined,
+      comparePrice: undefined,
       category: DEFAULT_PRODUCT_CATEGORY,
       images: form.images.filter(Boolean),
       weightPrices,
+      weightComparePrices,
       weights,
       sizes: weights,
       shoeSizes: [],
@@ -350,16 +444,6 @@ export default function AdminProductEditorPage() {
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5 md:col-span-2">
           <Label>Nom *</Label>
           <Input name="name" value={form.name} onChange={handleChange} placeholder="Miel de montagne" />
-        </div>
-
-        <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5">
-          <Label>Prix barre (DZD)</Label>
-          <Input
-            name="comparePrice"
-            type="number"
-            value={form.comparePrice}
-            onChange={handleChange}
-          />
         </div>
 
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5 md:col-span-2">
@@ -474,15 +558,39 @@ export default function AdminProductEditorPage() {
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {parseCsv(form.weights).map((weight) => (
-              <div key={weight} className="space-y-1 rounded-[18px] border border-border bg-background p-4">
-                <Label>Prix {weight} (DZD) *</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={form.weightPrices[weight] ?? ""}
-                  onChange={(event) => handleWeightPriceChange(weight, event.target.value)}
-                  placeholder={`Prix ${weight}`}
-                />
+              <div key={weight} className="space-y-4 rounded-[18px] border border-border bg-background p-4">
+                <div className="space-y-1">
+                  <Label>Prix {weight} (DZD) *</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={form.weightPrices[weight] ?? ""}
+                    onChange={(event) => handleWeightPriceChange(weight, event.target.value)}
+                    placeholder={`Prix ${weight}`}
+                  />
+                </div>
+
+                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={form.weightCompareEnabled[weight] ?? false}
+                    onChange={(event) => handleWeightCompareEnabledChange(weight, event.target.checked)}
+                  />
+                  Activer un prix barre pour {weight}
+                </label>
+
+                {form.weightCompareEnabled[weight] ? (
+                  <div className="space-y-1">
+                    <Label>Prix barre {weight} (DZD)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.weightComparePrices[weight] ?? ""}
+                      onChange={(event) => handleWeightComparePriceChange(weight, event.target.value)}
+                      placeholder={`Ancien prix ${weight}`}
+                    />
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
