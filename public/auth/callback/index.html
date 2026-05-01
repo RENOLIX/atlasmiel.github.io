@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verification ATLAS-Miel</title>
+    <script>
+      (function () {
+        var rawHash = window.location.hash ? window.location.hash.slice(1) : "";
+        var rawSearch = window.location.search ? window.location.search.slice(1) : "";
+        var params = new URLSearchParams(rawHash || rawSearch);
+        var failed = params.has("error") || params.has("error_code");
+        window.location.replace("/admin/login?verified=" + (failed ? "0" : "1"));
+      })();
+    </script>
+  </head>
+  <body>
+    Redirection...
+  </body>
+</html>

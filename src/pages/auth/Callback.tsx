@@ -35,9 +35,15 @@ export default function AuthCallback() {
       const accessToken = params.get("access_token");
       const refreshToken = params.get("refresh_token");
       const tokenHash = params.get("token_hash");
+      const verificationToken = params.get("token");
       const type = params.get("type");
+      const hasAuthError = params.has("error") || params.has("error_code");
 
       try {
+        if (hasAuthError) {
+          throw new Error("Supabase verification failed.");
+        }
+
         if (accessToken && refreshToken) {
           const { error } = await authClient.auth.setSession({
             access_token: accessToken,
@@ -53,6 +59,11 @@ export default function AuthCallback() {
             type: type as EmailOtpType,
           });
           if (error) throw error;
+        } else if (verificationToken && type) {
+          // Default Supabase email links verify on /auth/v1/verify before redirecting here.
+          // If only token/type remain in the URL, avoid leaving the user on a blank callback.
+          finish("/admin/login?verified=1");
+          return;
         }
 
         if (authClient === supabase) {

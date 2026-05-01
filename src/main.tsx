@@ -56,6 +56,7 @@ function getAuthPayloadFromLocation() {
       params.has("access_token") ||
       params.has("refresh_token") ||
       params.has("token_hash") ||
+      params.has("token") ||
       params.has("code");
     const isRecovery =
       params.get("type") === "recovery" ||
