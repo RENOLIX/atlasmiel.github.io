@@ -4,7 +4,7 @@ const rawSupabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const configuredSiteUrl = import.meta.env.VITE_PUBLIC_SITE_URL;
 const supabaseUrl = rawSupabaseUrl?.replace(/\/rest\/v1\/?$/, "");
-const defaultProductionSiteUrl = "https://renolix.github.io/atlasmiel.github.io/";
+const defaultProductionSiteUrl = "https://atlas-miel.com/";
 
 export const hasSupabaseConfig = Boolean(
   supabaseUrl && supabasePublishableKey,

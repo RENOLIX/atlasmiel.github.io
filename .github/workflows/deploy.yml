@@ -20,7 +20,7 @@ jobs:
     env:
       VITE_SUPABASE_URL: https://uvvavukmbffwnecvfiys.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_cfSnUnFt19bnwLOqQ-l6Dg_Bei01S5Y
-      VITE_PUBLIC_SITE_URL: https://renolix.github.io/atlasmiel.github.io/
+      VITE_PUBLIC_SITE_URL: https://atlas-miel.com/
     steps:
       - name: Checkout
         uses: actions/checkout@v4
