@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -11,7 +11,7 @@ import ScrollToTop from "@/components/app/ScrollToTop";
 import { useAuth } from "@/components/providers/auth";
 import { DefaultProviders } from "@/components/providers/default";
 import LocaleWrapper from "@/components/providers/locale-wrapper";
-import { SAVED_OR_DEFAULT_LOCALE, setLocaleInPath } from "@/i18n";
+import { changeLocale } from "@/i18n";
 import "@/i18n";
 import AdminLayout from "@/pages/admin/layout";
 import AdminLoginPage from "@/pages/admin/login/page";
@@ -30,6 +30,7 @@ import Contact from "@/pages/contact/page";
 import NotFound from "@/NotFound";
 import Intro from "@/components/Intro";
 import { MetaPixelTracker } from "@/lib/meta-pixel";
+import { useTranslation } from "react-i18next";
 
 function AdminIndexRedirect() {
   const { isAdmin, canManageOrders } = useAuth();
@@ -41,6 +42,18 @@ function AdminIndexRedirect() {
 
 function IntroRedirect({ onDone }: { onDone: () => void }) {
   return <Intro onDone={onDone} />;
+}
+
+function ArabicDefaultWrapper() {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    if (i18n.language !== "ar") {
+      void changeLocale("ar");
+    }
+  }, [i18n.language]);
+
+  return <Outlet />;
 }
 
 export default function App() {
@@ -73,7 +86,6 @@ function AppRoutes() {
       <ScrollToTop />
       <Suspense fallback={<div />}>
         <Routes>
-          <Route path="/" element={<Navigate to={setLocaleInPath(SAVED_OR_DEFAULT_LOCALE, "/")} replace />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
@@ -85,6 +97,13 @@ function AppRoutes() {
             <Route path="orders" element={<AdminOrdersPage />} />
             <Route path="meta-pixel" element={<AdminMetaPixelPage />} />
             <Route path="users" element={<AdminUsersPage />} />
+          </Route>
+          <Route path="/" element={<ArabicDefaultWrapper />}>
+            <Route index element={<Index />} />
+            <Route path="produits" element={<Produits />} />
+            <Route path="produits/:id" element={<ProduitDetail />} />
+            <Route path="histoire" element={<Histoire />} />
+            <Route path="contact" element={<Contact />} />
           </Route>
           <Route path="/:lng" element={<LocaleWrapper><Outlet /></LocaleWrapper>}>
             <Route index element={<Index />} />

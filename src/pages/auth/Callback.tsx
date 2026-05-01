@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import type { EmailOtpType } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { createSecondarySupabaseClient, supabase } from "@/lib/supabase";
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -17,7 +17,9 @@ export default function AuthCallback() {
     };
 
     const confirmAuth = async () => {
-      if (!supabase) {
+      const authClient = createSecondarySupabaseClient() ?? supabase;
+
+      if (!authClient) {
         finish("/admin/login");
         return;
       }
@@ -37,20 +39,26 @@ export default function AuthCallback() {
 
       try {
         if (accessToken && refreshToken) {
-          await supabase.auth.setSession({
+          const { error } = await authClient.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
+          if (error) throw error;
         } else if (code) {
-          await supabase.auth.exchangeCodeForSession(code);
+          const { error } = await authClient.auth.exchangeCodeForSession(code);
+          if (error) throw error;
         } else if (tokenHash && type) {
-          await supabase.auth.verifyOtp({
+          const { error } = await authClient.auth.verifyOtp({
             token_hash: tokenHash,
             type: type as EmailOtpType,
           });
+          if (error) throw error;
         }
 
-        await supabase.auth.signOut();
+        if (authClient === supabase) {
+          await authClient.auth.signOut();
+        }
+
         finish("/admin/login?verified=1");
       } catch {
         finish("/admin/login?verified=0");

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { BackofficeRole } from "@/types";
 
+const MAX_BACKOFFICE_USERS = 50;
+
 export default function AdminUsersPage() {
   const {
     user,
@@ -92,7 +94,7 @@ export default function AdminUsersPage() {
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Cree des acces back-office et attribue un role administrateur ou
-              employe.
+              employe. Jusqu'a {MAX_BACKOFFICE_USERS} comptes peuvent etre geres ici.
             </p>
           </div>
         </div>
@@ -170,7 +172,7 @@ export default function AdminUsersPage() {
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-[#fff8fb] px-4 py-2 text-xs uppercase tracking-[0.22em] text-muted-foreground">
               <ShieldCheck className="h-4 w-4" />
-              {adminUsers.length} compte(s)
+              {adminUsers.length}/{MAX_BACKOFFICE_USERS} compte(s)
             </div>
           </div>
 

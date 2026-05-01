@@ -51,6 +51,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
+const MAX_BACKOFFICE_USERS = 50;
 
 function rowToAdminUser(row: Record<string, unknown>): AdminUserRecord {
   return {
@@ -105,7 +106,8 @@ async function fetchAdminUsersList() {
   const withRole = await supabase
     .from("admin_users")
     .select("user_id, email, role, created_at")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, MAX_BACKOFFICE_USERS - 1);
 
   if (!withRole.error) {
     return {
@@ -122,7 +124,8 @@ async function fetchAdminUsersList() {
   const legacy = await supabase
     .from("admin_users")
     .select("user_id, email, created_at")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, MAX_BACKOFFICE_USERS - 1);
 
   if (legacy.error) {
     return { data: [] as AdminUserRecord[], error: legacy.error.message };
