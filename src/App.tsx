@@ -18,6 +18,7 @@ import AdminLoginPage from "@/pages/admin/login/page";
 import AdminResetPasswordPage from "@/pages/admin/reset-password/page";
 import AuthCallback from "@/pages/auth/Callback";
 import AdminOrdersPage from "@/pages/admin/orders/page";
+import AdminMetaPixelPage from "@/pages/admin/meta-pixel/page";
 import AdminProductsPage from "@/pages/admin/products/page";
 import AdminProductEditorPage from "@/pages/admin/products/product-editor-page";
 import AdminUsersPage from "@/pages/admin/users/page";
@@ -28,6 +29,7 @@ import Histoire from "@/pages/histoire/page";
 import Contact from "@/pages/contact/page";
 import NotFound from "@/NotFound";
 import Intro from "@/components/Intro";
+import { MetaPixelTracker } from "@/lib/meta-pixel";
 
 function AdminIndexRedirect() {
   const { isAdmin, canManageOrders } = useAuth();
@@ -67,6 +69,7 @@ function AppRoutes() {
   return (
     <>
       {!introDone && !isAdminArea && isHomePage && <IntroRedirect onDone={() => setIntroDone(true)} />}
+      <MetaPixelTracker />
       <ScrollToTop />
       <Suspense fallback={<div />}>
         <Routes>
@@ -80,6 +83,7 @@ function AppRoutes() {
             <Route path="products/new" element={<AdminProductEditorPage />} />
             <Route path="products/:id" element={<AdminProductEditorPage />} />
             <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="meta-pixel" element={<AdminMetaPixelPage />} />
             <Route path="users" element={<AdminUsersPage />} />
           </Route>
           <Route path="/:lng" element={<LocaleWrapper><Outlet /></LocaleWrapper>}>

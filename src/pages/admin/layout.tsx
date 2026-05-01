@@ -3,6 +3,7 @@ import { Navigate, Outlet, Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   LogOut,
+  Megaphone,
   Menu,
   Package,
   ShoppingBag,
@@ -24,6 +25,7 @@ const NAV: Array<{
 }> = [
   { label: "Produits", href: "/admin/products", icon: Package, roles: ["admin"] },
   { label: "Commandes", href: "/admin/orders", icon: ShoppingBag, roles: ["admin", "employee"] },
+  { label: "Meta Pixel", href: "/admin/meta-pixel", icon: Megaphone, roles: ["admin"] },
   { label: "Utilisateurs", href: "/admin/users", icon: Users, roles: ["admin"] },
 ];
 

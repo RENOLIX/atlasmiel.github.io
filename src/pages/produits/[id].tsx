@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/shop-store";
 import { formatDzd } from "@/lib/currency";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 import { getWeightComparePrice, getWeightPrice } from "@/lib/product-pricing";
 import {
   HONEY_COMB,
@@ -269,6 +270,20 @@ export default function ProduitDetail() {
     ? [t(`prod.${staticId}.b1`), t(`prod.${staticId}.b2`), t(`prod.${staticId}.b3`)]
     : copy.fallbackBenefits;
 
+  useEffect(() => {
+    if (!productExists || !id || !productName || price <= 0) {
+      return;
+    }
+
+    trackMetaPixel("ViewContent", {
+      content_ids: [id],
+      content_name: productName,
+      content_type: "product",
+      currency: "DZD",
+      value: price,
+    });
+  }, [id, productExists, productName, price]);
+
   const onSubmit = async (data: FormValues) => {
     if (!productExists || !id) return;
 
@@ -300,6 +315,14 @@ export default function ProduitDetail() {
     });
 
     setOrdered(true);
+    trackMetaPixel("Purchase", {
+      content_ids: [id],
+      content_name: productName,
+      content_type: "product",
+      currency: "DZD",
+      num_items: data.quantity,
+      value: total,
+    });
     toast.success(`${copy.toast} - ${data.phone}`);
     reset({ quantity: 1, deliveryMethod: "domicile" });
     setValue("wilaya", "");
