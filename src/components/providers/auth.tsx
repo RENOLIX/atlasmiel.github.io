@@ -264,7 +264,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
           return;
         }
 
-        setLoading(true);
+        const shouldShowLoadingScreen =
+          event === "INITIAL_SESSION" ||
+          event === "SIGNED_IN" ||
+          event === "SIGNED_OUT";
+
+        if (shouldShowLoadingScreen) {
+          setLoading(true);
+        }
+
         setSession(nextSession ?? null);
         setUser(nextSession?.user ?? null);
         await syncRole(nextSession?.user ?? null);

@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useShop } from "@/hooks/use-shop";
-import type { ProductCategory } from "@/types";
+import type { Product, ProductCategory } from "@/types";
 
 const MAX_IMAGES = 8;
 const DEFAULT_PRODUCT_CATEGORY: ProductCategory = "femme";
 const PRESET_WEIGHTS = ["500g", "1kg"];
+const PRODUCT_DRAFT_PREFIX = "__atlas_admin_product_draft__";
 
 const EMPTY_FORM = {
   name: "",
@@ -26,6 +27,59 @@ const EMPTY_FORM = {
   featured: false,
   active: true,
 };
+
+type ProductFormState = typeof EMPTY_FORM;
+
+function createEmptyForm(): ProductFormState {
+  return {
+    ...EMPTY_FORM,
+    images: [],
+    weightPrices: { ...EMPTY_FORM.weightPrices },
+    weightComparePrices: {},
+    weightCompareEnabled: {},
+  };
+}
+
+function readProductDraft(key: string): ProductFormState | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) {
+      return null;
+    }
+
+    const draft = JSON.parse(raw) as Partial<ProductFormState>;
+    return {
+      ...createEmptyForm(),
+      ...draft,
+      images: Array.isArray(draft.images) ? draft.images : [],
+      weightPrices: draft.weightPrices ?? {},
+      weightComparePrices: draft.weightComparePrices ?? {},
+      weightCompareEnabled: draft.weightCompareEnabled ?? {},
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveProductDraft(key: string, form: ProductFormState) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(key, JSON.stringify(form));
+}
+
+function clearProductDraft(key: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(key);
+}
 
 function parseCsv(value: string) {
   return value
@@ -84,6 +138,21 @@ function getFirstWeightPrice(weights: string[], prices: Record<string, string>) 
   return 0;
 }
 
+function productToForm(product: Product): ProductFormState {
+  return {
+    name: product.name,
+    description: product.description,
+    images: product.images,
+    weights: product.weights.join(","),
+    weightPrices: getFormWeightPrices(product.weights, product.weightPrices, product.price),
+    weightComparePrices: getFormWeightComparePrices(product.weights, product.weightComparePrices, product.comparePrice),
+    weightCompareEnabled: getFormWeightCompareEnabled(product.weights, product.weightComparePrices, product.comparePrice),
+    stock: String(product.stock),
+    featured: product.featured,
+    active: product.active,
+  };
+}
+
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -133,8 +202,10 @@ export default function AdminProductEditorPage() {
   const { getProductById, createProduct, updateProduct } = useShop();
   const product = id ? getProductById(id) : undefined;
   const isNew = !id;
+  const draftKey = `${PRODUCT_DRAFT_PREFIX}${isNew ? "new" : id}`;
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState<ProductFormState>(() => readProductDraft(draftKey) ?? createEmptyForm());
+  const [draftReady, setDraftReady] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
 
@@ -143,8 +214,18 @@ export default function AdminProductEditorPage() {
   }
 
   useEffect(() => {
+    setDraftReady(false);
+    const storedDraft = readProductDraft(draftKey);
+
+    if (storedDraft) {
+      setForm(storedDraft);
+      setDraftReady(true);
+      return;
+    }
+
     if (isNew) {
-      setForm(EMPTY_FORM);
+      setForm(createEmptyForm());
+      setDraftReady(true);
       return;
     }
 
@@ -152,19 +233,17 @@ export default function AdminProductEditorPage() {
       return;
     }
 
-    setForm({
-      name: product.name,
-      description: product.description,
-      images: product.images,
-      weights: product.weights.join(","),
-      weightPrices: getFormWeightPrices(product.weights, product.weightPrices, product.price),
-      weightComparePrices: getFormWeightComparePrices(product.weights, product.weightComparePrices, product.comparePrice),
-      weightCompareEnabled: getFormWeightCompareEnabled(product.weights, product.weightComparePrices, product.comparePrice),
-      stock: String(product.stock),
-      featured: product.featured,
-      active: product.active,
-    });
-  }, [isNew, product]);
+    setForm(productToForm(product));
+    setDraftReady(true);
+  }, [draftKey, isNew, product?.id]);
+
+  useEffect(() => {
+    if (!draftReady) {
+      return;
+    }
+
+    saveProductDraft(draftKey, form);
+  }, [draftKey, draftReady, form]);
 
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -384,10 +463,12 @@ export default function AdminProductEditorPage() {
     try {
       if (isNew) {
         const created = await createProduct(payload);
+        clearProductDraft(draftKey);
         toast.success("Produit cree");
         navigate(`/admin/products/${created.id}`, { replace: true });
       } else if (id) {
         await updateProduct(id, payload);
+        clearProductDraft(draftKey);
         toast.success("Produit mis a jour");
       }
     } catch (error) {
@@ -395,6 +476,11 @@ export default function AdminProductEditorPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCancel = () => {
+    clearProductDraft(draftKey);
+    setForm(createEmptyForm());
   };
 
   if (!isNew && !product) {
@@ -626,7 +712,7 @@ export default function AdminProductEditorPage() {
           <Button type="submit" size="lg" disabled={saving || uploadingImages}>
             {saving ? "Enregistrement..." : "Enregistrer"}
           </Button>
-          <Link to="/admin/products">
+          <Link to="/admin/products" onClick={handleCancel}>
             <Button type="button" variant="secondary" size="lg">
               Annuler
             </Button>
