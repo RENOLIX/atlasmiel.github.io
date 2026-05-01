@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Atlas Miel</title>
+    <script>
+      (function () {
+        var pathSegmentsToKeep = 1;
+        var location = window.location;
+        var segments = location.pathname.split("/");
+        var base = segments.slice(0, 1 + pathSegmentsToKeep).join("/");
+        var route = location.pathname.slice(base.length).replace(/^\//, "");
+        var query = location.search
+          ? "&" + location.search.slice(1).replace(/&/g, "~and~")
+          : "";
+
+        location.replace(base + "/?/" + route + query + location.hash);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

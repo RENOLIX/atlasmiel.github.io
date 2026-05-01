@@ -45,6 +45,33 @@ const frCommon = {
       }
 };
 
+const enCommon = {
+  ...frCommon,
+  nav: { home: "Home", products: "Products", history: "About", contact: "Contact", order: "Order now" },
+  footer: { tagline: "Pure, natural and authentic honey from Algeria.", nav: "Navigation", contact: "Contact", rights: "ATLAS-Miel. All rights reserved.", pure: "Pure - Natural - Algerian" },
+  hero: { badge: "Natural honey from Algeria", title2: "Honey", subtitle: "Pure honey carefully selected to bring you the richness of Algerian terroirs.", "cta.products": "View products", "cta.history": "Our story", scroll: "Scroll" },
+  features: { natural: "100% natural", "natural.desc": "No additives or preservatives.", quality: "Controlled quality", "quality.desc": "A careful selection.", tradition: "Know-how", "tradition.desc": "A passion passed on.", taste: "Rich taste", "taste.desc": "Deep natural aromas." },
+  honeyTypes: {
+    title: "Honey and hive products",
+    liquid: { title: "Natural honey", desc: "Natural liquid honey is the essence of nature's purity, with a light texture, rich taste and many benefits. We offer a careful selection of premium varieties for an authentic natural experience." },
+    hive: { title: "Hive products", desc: "Hive products are natural treasures rich in nutrients and health benefits. We offer pollen, propolis and royal jelly, carefully selected to support wellness and vitality." },
+  },
+  products: { tag: "Selection", title: "Our signature honeys", viewAll: "View all products", order: "Order", page: { badge: "Shop", title: "Our Products", subtitle: "Choose your honey and order directly online." } },
+  trust: { natural: "100% natural", delivery: "Delivery to 69 wilayas" },
+  testimonials: { title: "Customer reviews", first: { text: "Top product, good packaging and high quality honey.", name: "عبد القادر زروقي" }, second: { text: "Excellent honey, natural and very tasty. I recommend it.", name: "أمين بن عمر" }, third: { text: "Good product, fast delivery and excellent honey quality.", name: "محمد أمين قادري" } },
+  cta: { title: "Taste authenticity", desc: "Order your natural honey jar and receive it anywhere in Algeria.", btn: "Order now" },
+  contact: { badge: "Get in touch", title: "Contact", subtitle: "Let's talk honey", desc: "Have a question, a special order or need product advice? Send us a message.", address: "Address", "address.val": "Algiers, Algeria", phone: "Phone", email: "Email", name: "Name", message: "Message", send: "Send", sending: "Sending...", success: "Message sent successfully" },
+  history: { since: "Since 2008", title: "Our Story", timeline: "Timeline", "y2008": "First hives", "y2008.desc": "A family passion begins.", "y2012": "Local selection", "y2012.desc": "Searching for the best sources.", "y2016": "Stronger quality", "y2016.desc": "Improved control and packaging.", "y2020": "New identity", "y2020.desc": "ATLAS-Miel becomes a clear brand.", "y2024": "Online sales", "y2024.desc": "Simple orders and fast delivery.", heritage: { title1: "A natural", title2: "heritage", p1: "We choose honey for its purity, texture and taste.", p2: "Every jar carries a simple promise: authenticity, transparency and pleasure." } },
+  product: { back: "Back to products", notfound: "Product not found", "notfound.back": "Back", delivery: "Delivery available", payment: "Cash on delivery", order: { title: "Order this product", name: "Full name", phone: "Phone", wilaya: "Wilaya", qty: "Quantity", address: "Address", total: "Total", submitting: "Sending...", submit: "Confirm order", note: "Our team will contact you to confirm delivery.", success: { title: "Order received", desc: "Thank you. We will contact you soon.", new: "New order" } } },
+  prod: {
+    montagne: { name: "Mountain Honey", desc: "Golden honey with wild notes, rich and balanced.", tag: "Signature", origin: "Atlas", b1: "Rich aromas", b2: "Smooth texture", b3: "Ideal for breakfast" },
+    jujubier: { name: "Jujube Honey", desc: "Premium honey with a deep and naturally intense taste.", tag: "Premium", origin: "South", b1: "Powerful flavor", b2: "Highly appreciated", b3: "500g jar" },
+    "toutes-fleurs": { name: "Wildflower Honey", desc: "Soft floral honey, perfect for the whole family.", tag: "Soft", origin: "Meadows", b1: "Floral taste", b2: "Daily use", b3: "Natural" },
+    romarin: { name: "Rosemary Honey", desc: "Light honey with elegant herbal notes.", tag: "Aromatic", origin: "Tell", b1: "Delicate aroma", b2: "Excellent in tea", b3: "Careful harvest" },
+    thym: { name: "Thyme Honey", desc: "Intense fragrant honey with Mediterranean character.", tag: "Intense", origin: "Mountains", b1: "Powerful notes", b2: "Dense texture", b3: "Strong character" },
+  },
+};
+
 const arCommon = {
   nav: { home: "الرئيسية", products: "المنتجات", history: "قصتنا", contact: "اتصل بنا", order: "اطلب الآن" },
   footer: { tagline: "عسل طبيعي، نقي وأصيل من خيرات الجزائر.", nav: "التصفح", contact: "التواصل", rights: "ATLAS-Miel. جميع الحقوق محفوظة.", pure: "نقي - طبيعي - جزائري" },
@@ -71,7 +98,7 @@ const arCommon = {
 
 const resources = {
   fr: { common: frCommon },
-  en: { common: frCommon },
+  en: { common: enCommon },
   ar: { common: arCommon },
 };
 

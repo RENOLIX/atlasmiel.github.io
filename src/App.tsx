@@ -6,13 +6,12 @@ import {
   Route,
   Routes,
   useLocation,
-  useNavigate,
 } from "react-router-dom";
 import ScrollToTop from "@/components/app/ScrollToTop";
 import { useAuth } from "@/components/providers/auth";
 import { DefaultProviders } from "@/components/providers/default";
 import LocaleWrapper from "@/components/providers/locale-wrapper";
-import { changeLocale, SAVED_OR_DEFAULT_LOCALE, setLocaleInPath } from "@/i18n";
+import { SAVED_OR_DEFAULT_LOCALE, setLocaleInPath } from "@/i18n";
 import "@/i18n";
 import AdminLayout from "@/pages/admin/layout";
 import AdminLoginPage from "@/pages/admin/login/page";
@@ -39,17 +38,7 @@ function AdminIndexRedirect() {
 }
 
 function IntroRedirect({ onDone }: { onDone: () => void }) {
-  const navigate = useNavigate();
-
-  return (
-    <Intro
-      onDone={() => {
-        void changeLocale("ar");
-        navigate("/ar", { replace: true });
-        onDone();
-      }}
-    />
-  );
+  return <Intro onDone={onDone} />;
 }
 
 export default function App() {
@@ -72,10 +61,12 @@ function AppRoutes() {
   const location = useLocation();
   const isAdminArea =
     location.pathname.startsWith("/admin") || location.pathname.startsWith("/auth");
+  const activePath = location.pathname.replace(/^\/(ar|fr|en)(?=\/|$)/, "") || "/";
+  const isHomePage = activePath === "/";
 
   return (
     <>
-      {!introDone && !isAdminArea && <IntroRedirect onDone={() => setIntroDone(true)} />}
+      {!introDone && !isAdminArea && isHomePage && <IntroRedirect onDone={() => setIntroDone(true)} />}
       <ScrollToTop />
       <Suspense fallback={<div />}>
         <Routes>

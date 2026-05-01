@@ -5,6 +5,27 @@ import "./index.css";
 
 const RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
 
+function restoreGithubPagesRoute() {
+  if (typeof window === "undefined" || !window.location.search.startsWith("?/")) {
+    return;
+  }
+
+  const basePath =
+    import.meta.env.BASE_URL === "/"
+      ? ""
+      : import.meta.env.BASE_URL.replace(/\/$/, "");
+  const route = window.location.search
+    .slice(2)
+    .replace(/~and~/g, "&")
+    .replace(/^\//, "");
+
+  window.history.replaceState(
+    {},
+    document.title,
+    `${basePath}/${route}${window.location.hash}`,
+  );
+}
+
 function getRecoveryPayloadFromLocation() {
   if (typeof window === "undefined") {
     return null;
@@ -50,6 +71,8 @@ function getRecoveryPayloadFromLocation() {
 }
 
 if (typeof window !== "undefined") {
+  restoreGithubPagesRoute();
+
   const recoveryPayload = getRecoveryPayloadFromLocation();
 
   if (recoveryPayload) {

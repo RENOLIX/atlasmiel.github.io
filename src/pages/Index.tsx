@@ -207,10 +207,8 @@ export default function Index() {
                 whileHover={{ y: -6 }}
                 className="group relative bg-white border border-[oklch(0.88_0.04_75)] p-8 md:p-10 hover:border-primary/40 transition-all duration-500 hover:shadow-xl"
               >
-                <div className="flex flex-col sm:flex-row items-start gap-6">
-                  <div className="shrink-0 w-28 h-28 md:w-32 md:h-32 border border-[oklch(0.72_0.16_68)]/30 bg-[oklch(0.99_0.02_86)] overflow-hidden flex items-center justify-center">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-contain p-2 transition-transform duration-500 group-hover:scale-110" />
-                  </div>
+                <div className="flex flex-col items-center text-center gap-5">
+                  <img src={item.image} alt={item.title} className="h-36 w-36 object-contain transition-transform duration-500 group-hover:scale-110" />
                   <div>
                     <h3 className="text-3xl font-semibold text-foreground mb-4">
                       {item.title}

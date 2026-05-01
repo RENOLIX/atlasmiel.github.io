@@ -92,4 +92,20 @@
   .admin-font * {
     font-family: "Open Sans", ui-sans-serif, system-ui, sans-serif !important;
   }
+
+  @keyframes bee-fly {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate(-15px, 15px) rotate(-5deg);
+    }
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+  }
+
+  .bee-fly {
+    animation: bee-fly 4s ease-in-out infinite;
+  }
 }
