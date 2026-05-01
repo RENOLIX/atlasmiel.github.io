@@ -454,6 +454,12 @@ export default function ProduitDetail() {
                 ))}
               </div>
 
+              <div className="mb-8 rounded-2xl border border-[#f4b400]/35 bg-[#fff9e6] px-5 py-4 text-right shadow-sm" dir="rtl">
+                <p className="text-sm font-bold leading-7 text-[#7a5200]">
+                  تنويه: هذا العسل خاضع للتحاليل المخبرية ومُدرج ضمن معايير الجودة الخاصة بالتغذية
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-[#f4b400]/30 bg-white p-4">
                   <Truck size={20} className="mb-2 text-[#f4b400]" />
