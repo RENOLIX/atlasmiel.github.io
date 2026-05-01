@@ -239,8 +239,6 @@ export default function ProduitDetail() {
 
   const productName = staticId ? t(`prod.${staticId}.name`) : storedProduct?.name ?? "";
   const productDesc = staticId ? t(`prod.${staticId}.desc`) : storedProduct?.description ?? "";
-  const productTag = staticId ? t(`prod.${staticId}.tag`) : "ATLAS";
-  const productOrigin = staticId ? t(`prod.${staticId}.origin`) : "Atlas";
   const basePrice = storedProduct?.price ?? (staticId ? PRODUCT_PRICES[staticId] : 0);
   const weights = (storedProduct?.weights?.length ? storedProduct.weights : ["500g", "1kg"]);
   const weightPrices = storedProduct?.weightPrices ?? (staticId ? PRODUCT_WEIGHT_PRICES[staticId] : {});
@@ -386,11 +384,6 @@ export default function ProduitDetail() {
             </div>
 
             <div className="lg:sticky lg:top-28">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <span className="bg-[#f4b400] px-4 py-2 text-xs font-bold uppercase tracking-widest text-black">{productTag}</span>
-                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{productOrigin}</span>
-              </div>
-
               <h1 className="mb-3 text-5xl md:text-6xl font-extrabold leading-tight text-foreground">{productName}</h1>
 
               <div className="mb-6 flex flex-wrap items-end gap-3">

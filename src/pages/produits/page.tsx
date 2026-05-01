@@ -17,6 +17,11 @@ export default function Produits() {
   const prefix = lng ? `/${lng}` : "";
   const isRtl = i18n.dir() === "rtl";
   const { activeProducts } = useStore();
+  const newBadgeLabel = i18n.language.startsWith("ar")
+    ? "جديد"
+    : i18n.language.startsWith("en")
+      ? "New"
+      : "Nouveaute";
   const products = activeProducts.length
     ? activeProducts
     : PRODUCT_IDS.map((id) => ({
@@ -47,18 +52,18 @@ export default function Produits() {
             const knownId = PRODUCT_IDS.includes(id as (typeof PRODUCT_IDS)[number]) ? id as (typeof PRODUCT_IDS)[number] : null;
             const name = knownId ? t(`prod.${knownId}.name`) : product.name;
             const desc = knownId ? t(`prod.${knownId}.desc`) : product.description;
-            const tag = knownId ? t(`prod.${knownId}.tag`) : "ATLAS";
-            const origin = knownId ? t(`prod.${knownId}.origin`) : "Atlas";
             const image = product.images[0] ?? (knownId ? PRODUCT_IMAGES[knownId] : HONEY_COMB);
+            const isNewProduct = index < 3;
 
             return (
             <motion.div key={id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: index * 0.08 }}>
               <Link to={`${prefix}/produits/${id}`} className="group block">
                 <div className="overflow-hidden aspect-[4/5] mb-5 relative">
                   <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-xs tracking-widest uppercase" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.6rem" }}>{tag}</div>
+                  {isNewProduct ? (
+                    <div className="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-xs tracking-widest uppercase" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.6rem" }}>{newBadgeLabel}</div>
+                  ) : null}
                 </div>
-                <p className="text-xs text-muted-foreground mb-1 tracking-widest uppercase" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.65rem" }}>{origin}</p>
                 <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{name}</h3>
                 <p className="text-muted-foreground mt-1 line-clamp-2" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.78rem" }}>{desc}</p>
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
