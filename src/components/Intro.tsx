@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import atlasLogo from "@/assets/atlas-logo.webp";
-import introPoster from "@/assets/golden-honey-dripping-from-honeycomb.jpg";
 
 export default function Intro({ onDone }: { onDone: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [leaving, setLeaving] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
   const introVideoSrc = `${import.meta.env.BASE_URL}videos/atlas-intro.mp4`;
 
   const dismiss = () => {
@@ -29,9 +27,8 @@ export default function Intro({ onDone }: { onDone: () => void }) {
   return (
     <AnimatePresence>
       {!leaving && (
-        <motion.div key="intro" initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] as const }} className="fixed inset-0 z-[9999] bg-[#1b1006] flex items-center justify-center overflow-hidden" onClick={dismiss}>
-          <img src={introPoster} alt="" className="absolute inset-0 h-full w-full object-cover pointer-events-none select-none" />
-          <video ref={videoRef} autoPlay playsInline muted loop={false} preload="auto" poster={introPoster} disablePictureInPicture disableRemotePlayback controlsList="nodownload nofullscreen noremoteplayback" onLoadedData={() => setVideoReady(true)} onCanPlay={() => setVideoReady(true)} onContextMenu={(e) => e.preventDefault()} className={`absolute inset-0 w-full h-full object-cover pointer-events-none select-none transition-opacity duration-300 ${videoReady ? "opacity-100" : "opacity-0"}`}>
+        <motion.div key="intro" initial={{ opacity: 1 }} exit={{ opacity: 0, scale: 1.05 }} transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] as const }} className="fixed inset-0 z-[9999] bg-black flex items-center justify-center overflow-hidden" onClick={dismiss}>
+          <video ref={videoRef} autoPlay playsInline muted loop={false} preload="auto" disablePictureInPicture disableRemotePlayback controlsList="nodownload nofullscreen noremoteplayback" onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none">
             <source src={introVideoSrc} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/30" />
