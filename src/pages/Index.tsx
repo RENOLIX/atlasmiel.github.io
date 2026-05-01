@@ -207,10 +207,12 @@ export default function Index() {
           </div>
           {i18n.language === "ar" ? (
             <motion.div
-              variants={itemReveal}
+              initial={{ opacity: 0, y: 70, scale: 0.94, filter: "blur(14px)" }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.35 }}
+              transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -4, scale: 1.01 }}
-              transition={{ type: "spring", stiffness: 180, damping: 18 }}
-              className="mx-auto max-w-6xl"
+              className="-mx-6 md:mx-auto md:max-w-6xl"
             >
               <img
                 src={arabicHoneyShowcase}
