@@ -433,7 +433,12 @@ export default function ProduitDetail() {
           </section>
         </motion.div>
 
-        <section className="mt-20 max-w-4xl mx-auto px-0 md:px-6">
+        <section className="relative mt-20 max-w-4xl mx-auto px-0 pb-28 md:px-6">
+          <img
+            src={honeyDripForm}
+            alt=""
+            className="pointer-events-none absolute -bottom-6 right-0 z-0 w-28 translate-x-1/4 md:-bottom-10 md:right-8 md:w-36 md:translate-x-1/2"
+          />
           <motion.form
             id="formulaire-commande"
             onSubmit={handleSubmit(onSubmit)}
@@ -441,11 +446,10 @@ export default function ProduitDetail() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.65 }}
-            className="relative w-full overflow-visible bg-white p-6 md:p-8 shadow-[0_18px_45px_rgba(0,0,0,0.10)] md:rounded-[24px]"
+            className="relative z-10 w-full overflow-visible bg-white p-6 md:p-8 shadow-[0_18px_45px_rgba(0,0,0,0.10)] md:rounded-[24px]"
             dir={formDir}
           >
             <img src={BEE_IMAGE} alt="" className="bee-fly pointer-events-none absolute -top-12 right-2 z-20 w-24" />
-            <img src={honeyDripForm} alt="" className="pointer-events-none absolute -bottom-28 -right-12 z-20 w-40 md:-bottom-36 md:-right-20 md:w-56" />
             <h2 className="mb-6 text-center text-3xl font-extrabold text-[#c68e00]">{copy.formTitle}</h2>
 
             {ordered ? (

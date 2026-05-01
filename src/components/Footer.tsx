@@ -22,18 +22,18 @@ export default function Footer() {
       className="bg-[#dda560] text-[#24170c]"
     >
       <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-12">
-        <div>
+        <div className="flex flex-col items-center text-center">
           <img src={atlasLogo} alt="ATLAS" className="mb-5 h-20 w-40 object-contain" />
           <p className="text-sm leading-relaxed max-w-xs opacity-80">
             Atlas-miel, miel naturel et produits de la ruche selectionnes avec soin.
           </p>
         </div>
 
-        <div>
+        <div className="text-left">
           <h4 className="text-sm font-semibold uppercase tracking-widest mb-5">
             Pages
           </h4>
-          <ul className="space-y-3" dir="rtl">
+          <ul className="space-y-3 text-right" dir="rtl">
             {pages.map((page) => (
               <li key={page.href}>
                 <Link to={page.href} className="text-sm opacity-80 hover:opacity-100 transition-opacity">
@@ -44,7 +44,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="text-left">
           <h4 className="text-sm font-semibold uppercase tracking-widest mb-5">
             Nos coordonnées
           </h4>
