@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
-                placeholder="admin@minaboutique.dz"
+                placeholder="admin@atlas-miel.com"
               />
             </div>
 
@@ -136,7 +136,7 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
-                placeholder="admin@minaboutique.dz"
+                placeholder="admin@atlas-miel.com"
               />
             </div>
 

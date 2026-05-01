@@ -303,6 +303,12 @@ export default function ProduitDetail() {
     toast.success(`${copy.toast} - ${data.phone}`);
     reset({ quantity: 1, deliveryMethod: "domicile" });
     setValue("wilaya", "");
+    window.setTimeout(() => {
+      document.getElementById("message-merci-commande")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 80);
   };
 
   const scrollToForm = () => {
@@ -454,7 +460,7 @@ export default function ProduitDetail() {
             <h2 className="mb-6 text-center text-3xl font-extrabold text-[#c68e00]">{copy.formTitle}</h2>
 
             {ordered ? (
-              <div className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
+              <div id="message-merci-commande" className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
                 <CheckCircle size={46} className="mx-auto mb-4 text-green-600" />
                 <h3 className="mb-2 text-2xl font-extrabold text-foreground">{copy.successTitle}</h3>
                 <p className="text-sm text-muted-foreground">{copy.successDesc}</p>

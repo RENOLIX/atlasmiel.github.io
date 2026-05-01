@@ -35,6 +35,7 @@ interface StoreContextValue {
   getProductById: (id: string) => Product | undefined;
   createOrder: (draft: OrderDraft) => Promise<Order>;
   updateOrderStatus: (id: string, status: OrderStatus) => Promise<void>;
+  removeOrder: (id: string) => Promise<void>;
   addItem: (item: CartItem) => void;
   removeItem: (
     productId: string,
@@ -539,6 +540,22 @@ export function StoreProvider({ children }: PropsWithChildren) {
     );
   };
 
+  const removeOrder = async (id: string) => {
+    if (hasSupabaseConfig && !canUpdateOrders) {
+      throw new Error("Acces refuse.");
+    }
+
+    if (hasSupabaseConfig && supabase) {
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    setOrders((currentOrders) => currentOrders.filter((order) => order.id !== id));
+  };
+
   const addItem = (nextItem: CartItem) => {
     setItems((currentItems) => {
       const existing = currentItems.find(
@@ -650,6 +667,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
         getProductById,
         createOrder,
         updateOrderStatus,
+        removeOrder,
         addItem,
         removeItem,
         updateQuantity,

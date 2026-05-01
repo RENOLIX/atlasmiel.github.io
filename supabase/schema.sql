@@ -212,6 +212,15 @@ with check (
   public.is_admin_user()
 );
 
+drop policy if exists "admins can delete orders" on public.orders;
+create policy "admins can delete orders"
+on public.orders
+for delete
+to authenticated
+using (
+  public.is_admin_user()
+);
+
 drop policy if exists "users can read own admin record" on public.admin_users;
 create policy "users can read own admin record"
 on public.admin_users

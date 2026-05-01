@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, Printer } from "lucide-react";
+import { Eye, Printer, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import BrandLogo from "@/components/shop/BrandLogo";
 import { useAuth } from "@/components/providers/auth";
@@ -231,7 +231,15 @@ function StatusSelect({
   );
 }
 
-function OrderDetails({ order }: { order: Order }) {
+function OrderDetails({
+  order,
+  canDeleteOrders,
+  onDeleteOrder,
+}: {
+  order: Order;
+  canDeleteOrders: boolean;
+  onDeleteOrder: (order: Order) => Promise<void>;
+}) {
   return (
     <div className="pt-3 grid grid-cols-1 xl:grid-cols-2 gap-6 text-sm">
       <div>
@@ -301,6 +309,15 @@ function OrderDetails({ order }: { order: Order }) {
           >
             <Printer className="h-4 w-4" /> Imprimer le bordereau
           </button>
+          {canDeleteOrders ? (
+            <button
+              type="button"
+              onClick={() => void onDeleteOrder(order)}
+              className="inline-flex items-center gap-2 border border-red-200 bg-red-50 px-4 py-2 text-xs uppercase tracking-[0.18em] text-red-700"
+            >
+              <Trash2 className="h-4 w-4" /> Supprimer
+            </button>
+          ) : null}
           <StatusBadge status={order.status} />
         </div>
       </div>
@@ -312,10 +329,12 @@ function MobileOrderCard({
   order,
   canUpdateOrders,
   onStatusChange,
+  onDeleteOrder,
 }: {
   order: Order;
   canUpdateOrders: boolean;
   onStatusChange: (id: string, nextStatus: OrderStatus) => Promise<void>;
+  onDeleteOrder: (order: Order) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -381,7 +400,7 @@ function MobileOrderCard({
 
       {open ? (
         <div className="mt-5 pt-4 border-t border-border">
-          <OrderDetails order={order} />
+          <OrderDetails order={order} canDeleteOrders={canUpdateOrders} onDeleteOrder={onDeleteOrder} />
         </div>
       ) : null}
     </article>
@@ -392,10 +411,12 @@ function DesktopOrderRow({
   order,
   canUpdateOrders,
   onStatusChange,
+  onDeleteOrder,
 }: {
   order: Order;
   canUpdateOrders: boolean;
   onStatusChange: (id: string, nextStatus: OrderStatus) => Promise<void>;
+  onDeleteOrder: (order: Order) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -429,7 +450,7 @@ function DesktopOrderRow({
       {open ? (
         <tr>
           <td colSpan={5} className="px-4 pb-4 bg-muted/30 border-b border-border">
-            <OrderDetails order={order} />
+            <OrderDetails order={order} canDeleteOrders={canUpdateOrders} onDeleteOrder={onDeleteOrder} />
           </td>
         </tr>
       ) : null}
@@ -439,11 +460,24 @@ function DesktopOrderRow({
 
 export default function AdminOrdersPage() {
   const { canManageOrders, canUpdateOrders } = useAuth();
-  const { orders, updateOrderStatus } = useShop();
+  const { orders, updateOrderStatus, removeOrder } = useShop();
 
   if (!canManageOrders) {
     return null;
   }
+
+  const handleDeleteOrder = async (order: Order) => {
+    if (!window.confirm(`Supprimer la commande ${order.orderNumber} ?`)) {
+      return;
+    }
+
+    try {
+      await removeOrder(order.id);
+      toast.success("Commande supprimee");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    }
+  };
 
   return (
     <div className="p-4 md:p-8">
@@ -452,7 +486,7 @@ export default function AdminOrdersPage() {
           <BrandLogo className="h-12 w-[150px]" />
           <div>
             <p className="text-[11px] uppercase tracking-[0.34em] text-muted-foreground">
-              Mina admin
+              Atlas admin
             </p>
             <h1 className="font-serif text-2xl font-bold md:text-3xl">Commandes</h1>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -478,6 +512,7 @@ export default function AdminOrdersPage() {
                 order={order}
                 canUpdateOrders={canUpdateOrders}
                 onStatusChange={updateOrderStatus}
+                onDeleteOrder={handleDeleteOrder}
               />
             ))}
           </div>
@@ -510,6 +545,7 @@ export default function AdminOrdersPage() {
                     order={order}
                     canUpdateOrders={canUpdateOrders}
                     onStatusChange={updateOrderStatus}
+                    onDeleteOrder={handleDeleteOrder}
                   />
                 ))}
               </tbody>

@@ -7,19 +7,9 @@ export function formatProductSelections(options: {
   shoeSize?: string;
   color?: string;
 }) {
-  const parts: string[] = [];
-
-  if (isMeaningfulOptionValue(options.color)) {
-    parts.push(`Couleur : ${options.color}`);
-  }
-
   if (isMeaningfulOptionValue(options.size)) {
-    parts.push(`Taille : ${options.size}`);
+    return `Poids : ${options.size}`;
   }
 
-  if (isMeaningfulOptionValue(options.shoeSize)) {
-    parts.push(`Pointure : ${options.shoeSize}`);
-  }
-
-  return parts.length > 0 ? parts.join(" / ") : "Option unique";
+  return "Poids non precise";
 }

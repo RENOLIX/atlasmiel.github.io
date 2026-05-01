@@ -85,7 +85,7 @@ export default function AdminUsersPage() {
           <BrandLogo className="h-12 w-[150px]" />
           <div>
             <p className="text-[11px] uppercase tracking-[0.34em] text-muted-foreground">
-              Mina admin
+              Atlas admin
             </p>
             <h1 className="font-serif text-2xl font-bold md:text-3xl">
               Utilisateurs
@@ -116,7 +116,7 @@ export default function AdminUsersPage() {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="employe@minaboutique.dz"
+                placeholder="employe@atlas-miel.com"
                 required
               />
             </div>

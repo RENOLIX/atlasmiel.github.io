@@ -14,15 +14,15 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
   HONEY_COMB,
-  HONEY_DRIP,
-  JAR_IMG,
   PRODUCT_IDS,
   PRODUCT_IMAGES,
-  PRODUCT_PRICES,
 } from "@/pages/produits/data";
 import { formatDzd } from "@/lib/currency";
+import { getLowestProductPrice } from "@/lib/product-pricing";
+import { useStore } from "@/lib/shop-store";
 import honeyLiquid from "@/assets/honey-liquid.png";
 import hiveProducts from "@/assets/hive-products.png";
+import ctaHoneycomb from "@/assets/golden-honey-dripping-from-honeycomb.jpg";
 
 const honeyAccent = "#ffa700";
 
@@ -51,6 +51,7 @@ export default function Index() {
   const prefix = lng ? `/${lng}` : "";
   const isRtl = i18n.dir() === "rtl";
   const heroVideoSrc = `${import.meta.env.BASE_URL}videos/atlas-hero.mp4`;
+  const { activeProducts } = useStore();
 
   const features = [
     { icon: Leaf, label: t("features.natural"), desc: t("features.natural.desc") },
@@ -69,6 +70,10 @@ export default function Index() {
     { text: t("testimonials.second.text"), name: t("testimonials.second.name") },
     { text: t("testimonials.third.text"), name: t("testimonials.third.name") },
   ];
+
+  const featuredProducts = activeProducts
+    .filter((product) => product.featured)
+    .slice(0, 3);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -241,28 +246,36 @@ export default function Index() {
             </h2>
           </div>
           <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={staggerReveal}>
-            {PRODUCT_IDS.slice(0, 3).map((id) => (
-              <motion.div key={id} variants={itemReveal} whileHover={{ y: -6 }}>
-              <Link to={`${prefix}/produits/${id}`} className="group block">
+            {featuredProducts.map((product) => {
+              const knownId = PRODUCT_IDS.includes(product.id as (typeof PRODUCT_IDS)[number])
+                ? product.id as (typeof PRODUCT_IDS)[number]
+                : null;
+              const name = knownId ? t(`prod.${knownId}.name`) : product.name;
+              const tag = knownId ? t(`prod.${knownId}.tag`) : "ATLAS";
+              const image = product.images[0] ?? (knownId ? PRODUCT_IMAGES[knownId] : HONEY_COMB);
+
+              return (
+              <motion.div key={product.id} variants={itemReveal} whileHover={{ y: -6 }}>
+              <Link to={`${prefix}/produits/${product.id}`} className="group block">
                 <div className="overflow-hidden aspect-[4/5] mb-5">
                   <img
-                    src={id === "montagne" ? HONEY_DRIP : id === "jujubier" ? PRODUCT_IMAGES[id] : JAR_IMG}
-                    alt={t(`prod.${id}.name`)}
+                    src={image}
+                    alt={name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                 </div>
                 <span className="text-xs text-primary tracking-widest uppercase opacity-70 mb-1 block" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.65rem" }}>
-                  {t(`prod.${id}.tag`)}
+                  {tag}
                 </span>
                 <h3 className="text-2xl font-light text-foreground group-hover:text-primary transition-colors" style={{ fontFamily: "Cormorant Garamond, serif" }}>
-                  {t(`prod.${id}.name`)}
+                  {name}
                 </h3>
                 <p className="text-lg font-medium text-primary mt-2" style={{ fontFamily: "Montserrat, sans-serif" }}>
-                  {formatDzd(PRODUCT_PRICES[id], i18n.language)}
+                  {formatDzd(getLowestProductPrice(product), i18n.language)}
                 </p>
               </Link>
               </motion.div>
-            ))}
+            )})}
           </motion.div>
           <div className="text-center mt-14">
             <Link
@@ -331,22 +344,24 @@ export default function Index() {
       </motion.section>
 
       <motion.section
-        className="py-24 bg-primary text-primary-foreground"
+        className="relative overflow-hidden py-28 text-white"
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-80px" }}
         variants={sectionReveal}
       >
-        <div className="text-center max-w-2xl mx-auto px-6">
-          <h2 className="text-5xl md:text-6xl font-light mb-6" style={{ fontFamily: "Cormorant Garamond, serif" }}>
+        <img src={ctaHoneycomb} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
+        <div className="relative z-10 text-center max-w-2xl mx-auto px-6 drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+          <h2 className="text-5xl md:text-7xl font-extrabold mb-6 text-[#ffd36a]" style={{ fontFamily: "Georgia, serif" }}>
             {t("cta.title")}
           </h2>
-          <p className="opacity-80 mb-10 leading-relaxed" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.9rem" }}>
+          <p className="text-lg md:text-xl text-white/90 mb-10 leading-relaxed font-semibold" style={{ fontFamily: "Open Sans, sans-serif" }}>
             {t("cta.desc")}
           </p>
           <Link
             to={`${prefix}/produits`}
-            className="inline-flex items-center justify-center gap-3 px-10 py-4 bg-white text-primary text-sm tracking-widest uppercase hover:bg-white/90 transition-all duration-300"
+            className="inline-flex items-center justify-center gap-3 rounded-full bg-[#ffa700] px-10 py-4 text-sm font-extrabold tracking-widest uppercase text-[#24170c] shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-all duration-300 hover:bg-[#ffd36a]"
             style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.72rem" }}
           >
             {t("cta.btn")}
