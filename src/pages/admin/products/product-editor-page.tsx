@@ -70,7 +70,20 @@ function saveProductDraft(key: string, form: ProductFormState) {
     return;
   }
 
-  window.localStorage.setItem(key, JSON.stringify(form));
+  try {
+    window.localStorage.setItem(key, JSON.stringify(form));
+  } catch {
+    const lightweightDraft = {
+      ...form,
+      images: [],
+    };
+
+    try {
+      window.localStorage.setItem(key, JSON.stringify(lightweightDraft));
+    } catch {
+      // The form state stays alive in React even when browser storage is full.
+    }
+  }
 }
 
 function clearProductDraft(key: string) {
@@ -175,7 +188,7 @@ async function optimizeImageFile(file: File) {
   const originalDataUrl = await readFileAsDataUrl(file);
   const image = await loadImage(originalDataUrl);
 
-  const maxDimension = 1600;
+  const maxDimension = 1200;
   const scale = Math.min(1, maxDimension / image.width, maxDimension / image.height);
   const width = Math.max(1, Math.round(image.width * scale));
   const height = Math.max(1, Math.round(image.height * scale));
@@ -191,8 +204,7 @@ async function optimizeImageFile(file: File) {
 
   context.drawImage(image, 0, 0, width, height);
 
-  const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
-  return canvas.toDataURL(outputType, 0.86);
+  return canvas.toDataURL("image/jpeg", 0.78);
 }
 
 export default function AdminProductEditorPage() {
