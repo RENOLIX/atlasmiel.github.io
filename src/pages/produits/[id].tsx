@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/shop-store";
 import { formatDzd } from "@/lib/currency";
+import { getWeightPrice } from "@/lib/product-pricing";
 import {
   HONEY_COMB,
   HONEY_DIPPER,
@@ -238,9 +239,13 @@ export default function ProduitDetail() {
   const productDesc = staticId ? t(`prod.${staticId}.desc`) : storedProduct?.description ?? "";
   const productTag = staticId ? t(`prod.${staticId}.tag`) : "ATLAS";
   const productOrigin = staticId ? t(`prod.${staticId}.origin`) : "Atlas";
-  const price = storedProduct?.price ?? (staticId ? PRODUCT_PRICES[staticId] : 0);
   const comparePrice = storedProduct?.comparePrice;
+  const basePrice = storedProduct?.price ?? (staticId ? PRODUCT_PRICES[staticId] : 0);
   const weights = (storedProduct?.weights?.length ? storedProduct.weights : ["500g", "1kg"]);
+  const weightPrices = storedProduct?.weightPrices ?? weights.reduce<Record<string, number>>((prices, weight, index) => {
+    prices[weight] = index === 0 ? basePrice : basePrice * 2;
+    return prices;
+  }, {});
   const images = uniqueImages(storedProduct?.images?.length ? storedProduct.images : staticId ? STATIC_GALLERIES[staticId] : []);
 
   const { register, handleSubmit, watch, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormInput, unknown, FormValues>({
@@ -256,6 +261,7 @@ export default function ProduitDetail() {
   const quantity = Number(watch("quantity") || 1);
   const wilaya = String(watch("wilaya") || "");
   const deliveryMethod = (watch("deliveryMethod") || "domicile") as DeliveryMethod;
+  const price = getWeightPrice({ price: basePrice, weightPrices }, selectedWeight);
   const subtotal = price * quantity;
   const isFreeShipping = subtotal >= 6000;
   const shipping = wilaya ? (isFreeShipping ? 0 : DELIVERY_PRICES[wilaya]?.[deliveryMethod] ?? 0) : 0;
@@ -402,7 +408,10 @@ export default function ProduitDetail() {
                           : "border-border bg-white text-foreground hover:border-[#f4b400]"
                       }`}
                     >
-                      {weight}
+                      <span className="block">{weight}</span>
+                      <span className="mt-1 block text-sm font-extrabold">
+                        {formatDzd(getWeightPrice({ price: basePrice, weightPrices }, weight), i18n.language)}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -488,7 +497,10 @@ export default function ProduitDetail() {
 
                 <div>
                   <div className={`mb-3 border-[#f4b400] text-lg font-bold text-[#333] ${titleBorder}`}>{copy.selectedWeight}</div>
-                  <div className="rounded-xl bg-[#fff9e6] p-4 font-bold text-[#7a5200]">{selectedWeight}</div>
+                  <div className="flex items-center justify-between rounded-xl bg-[#fff9e6] p-4 font-bold text-[#7a5200]">
+                    <span>{selectedWeight}</span>
+                    <span>{formatDzd(price, i18n.language)}</span>
+                  </div>
                 </div>
 
                 <div>

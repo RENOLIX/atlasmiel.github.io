@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { HONEY_COMB, PRODUCT_IDS, PRODUCT_IMAGES, PRODUCT_PRICES } from "@/pages/produits/data";
 import { formatDzd } from "@/lib/currency";
 import { useStore } from "@/lib/shop-store";
+import { getLowestProductPrice } from "@/lib/product-pricing";
 
 export { PRODUCT_IDS };
 
@@ -23,6 +24,8 @@ export default function Produits() {
         name: t(`prod.${id}.name`),
         description: t(`prod.${id}.desc`),
         price: PRODUCT_PRICES[id],
+        weightPrices: { "500g": PRODUCT_PRICES[id], "1kg": PRODUCT_PRICES[id] * 2 },
+        weights: ["500g", "1kg"],
         images: [PRODUCT_IMAGES[id]],
       }));
 
@@ -59,7 +62,7 @@ export default function Produits() {
                 <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{name}</h3>
                 <p className="text-muted-foreground mt-1 line-clamp-2" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.78rem" }}>{desc}</p>
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                  <span className="text-xl font-extrabold text-primary" style={{ fontFamily: "Montserrat, sans-serif" }}>{formatDzd(product.price, i18n.language)}</span>
+                  <span className="text-xl font-extrabold text-primary" style={{ fontFamily: "Montserrat, sans-serif" }}>{formatDzd(getLowestProductPrice(product), i18n.language)}</span>
                   <span className="text-xs tracking-widest uppercase text-primary inline-flex items-center gap-1 group-hover:gap-2 transition-all" style={{ fontFamily: "Montserrat, sans-serif", fontSize: "0.65rem" }}>{t("products.order")} <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} /></span>
                 </div>
               </Link>

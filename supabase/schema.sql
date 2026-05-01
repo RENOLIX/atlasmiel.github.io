@@ -8,6 +8,7 @@ create table if not exists public.products (
   compare_price integer,
   category text not null check (category in ('nouveautes', 'femme', 'homme', 'accessoires')),
   images text[] not null default '{}',
+  weight_prices jsonb not null default '{}'::jsonb,
   weights text[] not null default '{500g,1kg}',
   stock integer not null default 0,
   featured boolean not null default false,
@@ -18,6 +19,18 @@ create table if not exists public.products (
 
 alter table public.products
 add column if not exists weights text[] not null default '{500g,1kg}';
+
+alter table public.products
+add column if not exists weight_prices jsonb not null default '{}'::jsonb;
+
+update public.products
+set weight_prices = coalesce(
+  nullif(weight_prices, '{}'::jsonb),
+  (
+    select jsonb_object_agg(weight, case when lower(weight) = '1kg' then price * 2 else price end)
+    from unnest(weights) as weight
+  )
+);
 
 alter table public.products
 drop column if exists shoe_sizes;

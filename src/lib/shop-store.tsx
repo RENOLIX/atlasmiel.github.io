@@ -100,8 +100,22 @@ function generateOrderNumber() {
 }
 
 function normalizeProductDraft(draft: ProductDraft) {
+  const draftWeightPrices = draft.weightPrices ?? {};
+  const weights = draft.weights.length ? draft.weights : Object.keys(draftWeightPrices);
+  const firstWeightPrice = weights
+    .map((weight) => Number(draftWeightPrices[weight] || 0))
+    .find((price) => price > 0);
+
   return {
     ...draft,
+    price: firstWeightPrice ?? draft.price,
+    weightPrices: weights.reduce<Record<string, number>>((prices, weight) => {
+      const price = Number(draftWeightPrices[weight] || 0);
+      if (price > 0) {
+        prices[weight] = price;
+      }
+      return prices;
+    }, {}),
     comparePrice:
       draft.comparePrice && draft.comparePrice > draft.price
         ? draft.comparePrice
@@ -118,6 +132,7 @@ function productToRow(product: Product) {
     compare_price: product.comparePrice ?? null,
     category: product.category,
     images: product.images,
+    weight_prices: product.weightPrices ?? {},
     weights: product.weights,
     stock: product.stock,
     featured: product.featured,
@@ -125,25 +140,37 @@ function productToRow(product: Product) {
   };
 }
 
+function parseWeightPrices(value: unknown, weights: string[], fallbackPrice: number) {
+  const input = value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+  return weights.reduce<Record<string, number>>((prices, weight) => {
+    const price = Number(input[weight] ?? fallbackPrice);
+    prices[weight] = price > 0 ? price : fallbackPrice;
+    return prices;
+  }, {});
+}
+
 function rowToProduct(row: Record<string, unknown>): Product {
+  const fallbackPrice = Number(row.price ?? 0);
+  const weights = Array.isArray(row.weights)
+    ? row.weights.map(String)
+    : Array.isArray(row.sizes)
+      ? row.sizes.map(String)
+      : [];
+
   return {
     id: String(row.id),
     name: String(row.name ?? ""),
     description: String(row.description ?? ""),
-    price: Number(row.price ?? 0),
+    price: fallbackPrice,
     comparePrice: row.compare_price ? Number(row.compare_price) : undefined,
     category: String(row.category ?? "femme") as Product["category"],
     images: Array.isArray(row.images) ? row.images.map(String) : [],
-    weights: Array.isArray(row.weights)
-      ? row.weights.map(String)
-      : Array.isArray(row.sizes)
-        ? row.sizes.map(String)
-        : [],
-    sizes: Array.isArray(row.weights)
-      ? row.weights.map(String)
-      : Array.isArray(row.sizes)
-        ? row.sizes.map(String)
-        : [],
+    weightPrices: parseWeightPrices(row.weight_prices, weights, fallbackPrice),
+    weights,
+    sizes: weights,
     shoeSizes: [],
     colors: [],
     stock: Number(row.stock ?? 0),

@@ -5,6 +5,7 @@ import BrandLogo from "@/components/shop/BrandLogo";
 import { useAuth } from "@/components/providers/auth";
 import { useShop } from "@/hooks/use-shop";
 import { Button } from "@/components/ui/button";
+import { getLowestProductPrice } from "@/lib/product-pricing";
 
 export default function AdminProductsPage() {
   const { canManageProducts } = useAuth();
@@ -101,7 +102,7 @@ export default function AdminProductsPage() {
                         <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                           Prix
                         </p>
-                        <p className="font-semibold">{product.price.toLocaleString("fr-DZ")} DZD</p>
+                        <p className="font-semibold">{getLowestProductPrice(product).toLocaleString("fr-DZ")} DZD</p>
                       </div>
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -197,7 +198,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-semibold">
-                      {product.price.toLocaleString("fr-DZ")} DZD
+                      {getLowestProductPrice(product).toLocaleString("fr-DZ")} DZD
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-muted-foreground">
                       {product.stock}

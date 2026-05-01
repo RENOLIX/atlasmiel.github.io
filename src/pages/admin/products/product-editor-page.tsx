@@ -17,10 +17,10 @@ const PRESET_WEIGHTS = ["500g", "1kg"];
 const EMPTY_FORM = {
   name: "",
   description: "",
-  price: "",
   comparePrice: "",
   images: [] as string[],
   weights: "500g,1kg",
+  weightPrices: { "500g": "", "1kg": "" } as Record<string, string>,
   stock: "10",
   featured: false,
   active: true,
@@ -39,6 +39,25 @@ function normalizeWeights(value: string[]) {
 
 function getCustomWeights(value: string) {
   return parseCsv(value).filter((entry) => !PRESET_WEIGHTS.includes(entry));
+}
+
+function getFormWeightPrices(weights: string[], prices: Record<string, number> | undefined, fallbackPrice: number) {
+  return weights.reduce<Record<string, string>>((nextPrices, weight) => {
+    const price = Number(prices?.[weight] ?? fallbackPrice);
+    nextPrices[weight] = price > 0 ? String(price) : "";
+    return nextPrices;
+  }, {});
+}
+
+function getFirstWeightPrice(weights: string[], prices: Record<string, string>) {
+  for (const weight of weights) {
+    const price = Number(prices[weight] || 0);
+    if (price > 0) {
+      return price;
+    }
+  }
+
+  return 0;
 }
 
 function readFileAsDataUrl(file: File) {
@@ -112,10 +131,10 @@ export default function AdminProductEditorPage() {
     setForm({
       name: product.name,
       description: product.description,
-      price: String(product.price),
       comparePrice: product.comparePrice ? String(product.comparePrice) : "",
       images: product.images,
       weights: product.weights.join(","),
+      weightPrices: getFormWeightPrices(product.weights, product.weightPrices, product.price),
       stock: String(product.stock),
       featured: product.featured,
       active: product.active,
@@ -189,6 +208,10 @@ export default function AdminProductEditorPage() {
       return {
         ...current,
         weights: normalizeWeights(nextWeights).join(","),
+        weightPrices: normalizeWeights(nextWeights).reduce<Record<string, string>>((prices, entry) => {
+          prices[entry] = current.weightPrices[entry] ?? "";
+          return prices;
+        }, {}),
       };
     });
   };
@@ -202,15 +225,29 @@ export default function AdminProductEditorPage() {
       return {
         ...current,
         weights: normalizeWeights([...selectedPresets, ...parseCsv(value)]).join(","),
+        weightPrices: normalizeWeights([...selectedPresets, ...parseCsv(value)]).reduce<Record<string, string>>((prices, entry) => {
+          prices[entry] = current.weightPrices[entry] ?? "";
+          return prices;
+        }, {}),
       };
     });
+  };
+
+  const handleWeightPriceChange = (weight: string, value: string) => {
+    setForm((current) => ({
+      ...current,
+      weightPrices: {
+        ...current.weightPrices,
+        [weight]: value,
+      },
+    }));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!form.name.trim() || !form.price.trim()) {
-      toast.error("Nom et prix requis");
+    if (!form.name.trim()) {
+      toast.error("Nom requis");
       return;
     }
 
@@ -220,15 +257,27 @@ export default function AdminProductEditorPage() {
       return;
     }
 
+    const weightPrices = weights.reduce<Record<string, number>>((prices, weight) => {
+      prices[weight] = Number(form.weightPrices[weight] || 0);
+      return prices;
+    }, {});
+
+    const missingPrice = weights.find((weight) => !weightPrices[weight] || weightPrices[weight] <= 0);
+    if (missingPrice) {
+      toast.error(`Prix requis pour ${missingPrice}.`);
+      return;
+    }
+
     setSaving(true);
 
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
-      price: Number(form.price),
+      price: getFirstWeightPrice(weights, form.weightPrices),
       comparePrice: form.comparePrice ? Number(form.comparePrice) : undefined,
       category: DEFAULT_PRODUCT_CATEGORY,
       images: form.images.filter(Boolean),
+      weightPrices,
       weights,
       sizes: weights,
       shoeSizes: [],
@@ -301,11 +350,6 @@ export default function AdminProductEditorPage() {
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5 md:col-span-2">
           <Label>Nom *</Label>
           <Input name="name" value={form.name} onChange={handleChange} placeholder="Miel de montagne" />
-        </div>
-
-        <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5">
-          <Label>Prix (DZD) *</Label>
-          <Input name="price" type="number" value={form.price} onChange={handleChange} />
         </div>
 
         <div className="space-y-1 rounded-[24px] border border-border bg-white/75 p-5">
@@ -396,7 +440,7 @@ export default function AdminProductEditorPage() {
           <div>
             <p className="font-medium text-sm">Poids du produit</p>
             <p className="text-xs text-muted-foreground mt-1">
-              Choisis 500g, 1kg, les deux, ou ajoute un autre poids manuellement.
+              Choisis 500g, 1kg, les deux, ou ajoute un autre poids. Chaque poids doit avoir son prix.
             </p>
           </div>
 
@@ -426,6 +470,21 @@ export default function AdminProductEditorPage() {
             <p className="text-xs text-muted-foreground">
               Separe plusieurs poids avec une virgule.
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {parseCsv(form.weights).map((weight) => (
+              <div key={weight} className="space-y-1 rounded-[18px] border border-border bg-background p-4">
+                <Label>Prix {weight} (DZD) *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={form.weightPrices[weight] ?? ""}
+                  onChange={(event) => handleWeightPriceChange(weight, event.target.value)}
+                  placeholder={`Prix ${weight}`}
+                />
+              </div>
+            ))}
           </div>
         </div>
 

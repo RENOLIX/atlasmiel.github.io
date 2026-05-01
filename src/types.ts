@@ -16,6 +16,7 @@ export interface Product {
   comparePrice?: number;
   category: ProductCategory;
   images: string[];
+  weightPrices: Record<string, number>;
   weights: string[];
   sizes: string[];
   shoeSizes: string[];
@@ -32,6 +33,7 @@ export interface ProductDraft {
   comparePrice?: number;
   category: ProductCategory;
   images: string[];
+  weightPrices: Record<string, number>;
   weights: string[];
   sizes: string[];
   shoeSizes: string[];
