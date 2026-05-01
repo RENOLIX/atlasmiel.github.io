@@ -24,3 +24,11 @@ export const PRODUCT_PRICES: Record<ProductId, number> = {
   romarin: 2200,
   thym: 2800,
 };
+
+export const PRODUCT_WEIGHT_PRICES: Record<ProductId, Record<string, number>> = {
+  montagne: { "500g": 1800, "1kg": 3400 },
+  jujubier: { "500g": 2500, "1kg": 4800 },
+  "toutes-fleurs": { "500g": 1400, "1kg": 2600 },
+  romarin: { "500g": 2200, "1kg": 4200 },
+  thym: { "500g": 2800, "1kg": 5400 },
+};

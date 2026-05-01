@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { HONEY_COMB, PRODUCT_IDS, PRODUCT_IMAGES, PRODUCT_PRICES } from "@/pages/produits/data";
+import { HONEY_COMB, PRODUCT_IDS, PRODUCT_IMAGES, PRODUCT_PRICES, PRODUCT_WEIGHT_PRICES } from "@/pages/produits/data";
 import { formatDzd } from "@/lib/currency";
 import { useStore } from "@/lib/shop-store";
 import { getLowestProductPrice } from "@/lib/product-pricing";
@@ -24,7 +24,7 @@ export default function Produits() {
         name: t(`prod.${id}.name`),
         description: t(`prod.${id}.desc`),
         price: PRODUCT_PRICES[id],
-        weightPrices: { "500g": PRODUCT_PRICES[id], "1kg": PRODUCT_PRICES[id] * 2 },
+        weightPrices: PRODUCT_WEIGHT_PRICES[id],
         weights: ["500g", "1kg"],
         images: [PRODUCT_IMAGES[id]],
       }));

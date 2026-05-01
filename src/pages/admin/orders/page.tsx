@@ -8,6 +8,7 @@ import type { Order, OrderStatus } from "@/types";
 import { getDeliveryMethodLabel } from "@/lib/shipping";
 import { formatProductSelections } from "@/lib/product-options";
 import { cn } from "@/lib/utils";
+import atlasLogo from "@/assets/atlas-logo.webp";
 
 const STATUSES: { value: OrderStatus; label: string; color: string }[] = [
   { value: "pending", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
@@ -18,7 +19,7 @@ const STATUSES: { value: OrderStatus; label: string; color: string }[] = [
 ];
 
 function formatPrice(value: number) {
-  return `${value.toLocaleString("fr-DZ")} DZD`;
+  return `${value.toLocaleString("fr-DZ")} DA`;
 }
 
 function formatDate(value: string) {
@@ -47,9 +48,7 @@ function buildPrintableOrderHtml(order: Order) {
       (item) => `
         <tr>
           <td>${escapeHtml(item.productName)}</td>
-          <td>${escapeHtml(item.size)}</td>
-          <td>${escapeHtml(item.shoeSize ?? "-")}</td>
-          <td>${escapeHtml(item.color)}</td>
+          <td>${escapeHtml(item.size || "-")}</td>
           <td>${item.quantity}</td>
           <td>${formatPrice(item.price)}</td>
           <td>${formatPrice(item.price * item.quantity)}</td>
@@ -63,24 +62,29 @@ function buildPrintableOrderHtml(order: Order) {
     <meta charset="UTF-8" />
     <title>Bordereau ${escapeHtml(order.orderNumber)}</title>
     <style>
-      body { font-family: Arial, sans-serif; color: #111; margin: 0; padding: 32px; }
+      body { font-family: Arial, sans-serif; color: #24170c; margin: 0; padding: 32px; background: #fffaf0; }
       .wrap { max-width: 920px; margin: 0 auto; }
-      .head { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+      .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 28px; border-bottom: 3px solid #dda560; padding-bottom: 18px; }
       h1, h2, h3, p { margin: 0; }
-      h1 { font-size: 28px; letter-spacing: 0.1em; }
-      h2 { font-size: 16px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.12em; }
-      .muted { color: #666; }
-      .brand-script { font-family: "Brush Script MT", "Segoe Script", cursive; font-size: 44px; letter-spacing: 0; color: #d85b92; }
-      .brand-sub { font-size: 13px; text-transform: uppercase; letter-spacing: 0.35em; margin-left: 10px; }
+      h1 { font-size: 25px; letter-spacing: 0.16em; text-transform: uppercase; }
+      h2 { font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: #7a4e18; }
+      .muted { color: #7d6b55; }
+      .brand { display: flex; align-items: center; gap: 16px; }
+      .brand img { width: 104px; height: auto; object-fit: contain; }
+      .brand-title { display: flex; flex-direction: column; gap: 4px; }
+      .brand-title strong { font-size: 24px; letter-spacing: 0.18em; }
+      .brand-title span { color: #7d6b55; font-size: 12px; }
+      .meta { text-align: right; line-height: 1.7; font-size: 13px; }
+      .shop-info { margin-top: 10px; line-height: 1.7; font-size: 12px; color: #5f4526; }
       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
-      .box { border: 1px solid #ddd; padding: 18px; }
+      .box { border: 1px solid #ead0a7; background: #fff; padding: 18px; min-height: 130px; }
       table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-      th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
-      th { background: #f5f5f5; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
+      th, td { border: 1px solid #ead0a7; padding: 10px; text-align: left; font-size: 13px; background: #fff; }
+      th { background: #dda560; color: #24170c; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; }
       .totals { margin-left: auto; width: 320px; }
-      .totals-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; }
-      .totals-row.total { font-weight: bold; font-size: 16px; border-bottom: 2px solid #111; }
-      .footer { margin-top: 32px; font-size: 12px; color: #555; }
+      .totals-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ead0a7; }
+      .totals-row.total { font-weight: bold; font-size: 16px; border-bottom: 2px solid #24170c; }
+      .footer { margin-top: 32px; font-size: 12px; color: #5f4526; border-top: 1px solid #ead0a7; padding-top: 14px; }
       @media print { body { padding: 0; } .wrap { padding: 24px; } }
     </style>
   </head>
@@ -88,10 +92,21 @@ function buildPrintableOrderHtml(order: Order) {
     <div class="wrap">
       <div class="head">
         <div>
-          <h1><span class="brand-script">Mina</span><span class="brand-sub">Boutique</span></h1>
+          <div class="brand">
+            <img src="${atlasLogo}" alt="ATLAS Miel" />
+            <div class="brand-title">
+              <strong>ATLAS-MIEL</strong>
+              <span>Miel naturel et produits de la ruche</span>
+            </div>
+          </div>
           <p class="muted">Bordereau de commande / livraison</p>
+          <div class="shop-info">
+            <p>Alger</p>
+            <p>Num : +213 561 45 82 86</p>
+            <p>Contact@atlas-miel.com</p>
+          </div>
         </div>
-        <div>
+        <div class="meta">
           <p><strong>Commande :</strong> ${escapeHtml(order.orderNumber)}</p>
           <p><strong>Date :</strong> ${escapeHtml(formatDate(order.createdAt))}</p>
           <p><strong>Statut :</strong> ${escapeHtml(order.status)}</p>
@@ -102,7 +117,7 @@ function buildPrintableOrderHtml(order: Order) {
         <div class="box">
           <h2>Client</h2>
           <p>${escapeHtml(order.customerName)}</p>
-          <p>${escapeHtml(order.customerEmail)}</p>
+          ${order.customerEmail ? `<p>${escapeHtml(order.customerEmail)}</p>` : ""}
           <p>${escapeHtml(order.customerPhone)}</p>
         </div>
         <div class="box">
@@ -120,9 +135,7 @@ function buildPrintableOrderHtml(order: Order) {
         <thead>
           <tr>
             <th>Produit</th>
-            <th>Taille</th>
-            <th>Pointure</th>
-            <th>Couleur</th>
+            <th>Poids</th>
             <th>Qte</th>
             <th>Prix</th>
             <th>Total</th>
@@ -138,7 +151,8 @@ function buildPrintableOrderHtml(order: Order) {
       </div>
 
       <div class="footer">
-        <p>Document genere depuis le panneau d'administration Mina Boutique.</p>
+        <p>Document genere depuis le panneau d'administration ATLAS-Miel.</p>
+        <p>Verification de la commande et confirmation telephonique avant livraison.</p>
       </div>
     </div>
   </body>

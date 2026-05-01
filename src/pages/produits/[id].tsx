@@ -21,6 +21,7 @@ import {
   JAR_IMG,
   PRODUCT_IDS,
   PRODUCT_PRICES,
+  PRODUCT_WEIGHT_PRICES,
   type ProductId,
 } from "@/pages/produits/data";
 
@@ -242,10 +243,7 @@ export default function ProduitDetail() {
   const comparePrice = storedProduct?.comparePrice;
   const basePrice = storedProduct?.price ?? (staticId ? PRODUCT_PRICES[staticId] : 0);
   const weights = (storedProduct?.weights?.length ? storedProduct.weights : ["500g", "1kg"]);
-  const weightPrices = storedProduct?.weightPrices ?? weights.reduce<Record<string, number>>((prices, weight, index) => {
-    prices[weight] = index === 0 ? basePrice : basePrice * 2;
-    return prices;
-  }, {});
+  const weightPrices = storedProduct?.weightPrices ?? (staticId ? PRODUCT_WEIGHT_PRICES[staticId] : {});
   const images = uniqueImages(storedProduct?.images?.length ? storedProduct.images : staticId ? STATIC_GALLERIES[staticId] : []);
 
   const { register, handleSubmit, watch, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormInput, unknown, FormValues>({
