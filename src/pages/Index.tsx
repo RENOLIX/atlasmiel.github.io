@@ -23,6 +23,7 @@ import { useStore } from "@/lib/shop-store";
 import honeyLiquid from "@/assets/honey-liquid.png";
 import hiveProducts from "@/assets/hive-products.png";
 import ctaHoneycomb from "@/assets/golden-honey-dripping-from-honeycomb.jpg";
+import arabicHoneyShowcase from "@/assets/arabic-honey-showcase.png";
 
 const honeyAccent = "#ffa700";
 
@@ -204,28 +205,43 @@ export default function Index() {
               )}
             </h2>
           </div>
-          <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-10" variants={staggerReveal}>
-            {honeyTypes.map((item) => (
-              <motion.div
-                key={item.title}
-                variants={itemReveal}
-                whileHover={{ y: -6 }}
-                className="group relative bg-white border border-[oklch(0.88_0.04_75)] p-8 md:p-10 hover:border-primary/40 transition-all duration-500 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center gap-5">
-                  <img src={item.image} alt={item.title} className="h-36 w-36 object-contain transition-transform duration-500 group-hover:scale-110" />
-                  <div>
-                    <h3 className="text-3xl font-semibold text-foreground mb-4">
-                      {item.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.85rem" }}>
-                      {item.desc}
-                    </p>
+          {i18n.language === "ar" ? (
+            <motion.div
+              variants={itemReveal}
+              whileHover={{ y: -4, scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 180, damping: 18 }}
+              className="mx-auto max-w-6xl"
+            >
+              <img
+                src={arabicHoneyShowcase}
+                alt="العسل ومنتجات الخلية"
+                className="w-full object-contain drop-shadow-[0_28px_55px_rgba(150,82,0,0.20)]"
+              />
+            </motion.div>
+          ) : (
+            <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-10" variants={staggerReveal}>
+              {honeyTypes.map((item) => (
+                <motion.div
+                  key={item.title}
+                  variants={itemReveal}
+                  whileHover={{ y: -6 }}
+                  className="group relative bg-white border border-[oklch(0.88_0.04_75)] p-8 md:p-10 hover:border-primary/40 transition-all duration-500 hover:shadow-xl"
+                >
+                  <div className="flex flex-col items-center text-center gap-5">
+                    <img src={item.image} alt={item.title} className="h-36 w-36 object-contain transition-transform duration-500 group-hover:scale-110" />
+                    <div>
+                      <h3 className="text-3xl font-semibold text-foreground mb-4">
+                        {item.title}
+                      </h3>
+                      <p className="text-muted-foreground leading-relaxed" style={{ fontFamily: "Montserrat, sans-serif", fontWeight: 300, fontSize: "0.85rem" }}>
+                        {item.desc}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </motion.section>
 
