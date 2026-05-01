@@ -51,3 +51,12 @@ export function getPasswordRecoveryRedirectUrl() {
 
   return `${origin}${pathname}`;
 }
+
+export function getAuthCallbackRedirectUrl() {
+  const siteUrl = getPasswordRecoveryRedirectUrl();
+  if (!siteUrl) {
+    return undefined;
+  }
+
+  return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
+}

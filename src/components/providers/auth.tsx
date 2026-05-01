@@ -10,6 +10,7 @@ import {
 import type { EmailOtpType, Session, User } from "@supabase/supabase-js";
 import {
   createSecondarySupabaseClient,
+  getAuthCallbackRedirectUrl,
   getPasswordRecoveryRedirectUrl,
   hasSupabaseConfig,
   supabase,
@@ -391,6 +392,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const { data, error } = await worker.auth.signUp({
       email: cleanEmail,
       password: input.password,
+      options: {
+        emailRedirectTo: getAuthCallbackRedirectUrl(),
+      },
     });
 
     if (error) {

@@ -26,7 +26,7 @@ function restoreGithubPagesRoute() {
   );
 }
 
-function getRecoveryPayloadFromLocation() {
+function getAuthPayloadFromLocation() {
   if (typeof window === "undefined") {
     return null;
   }
@@ -52,17 +52,22 @@ function getRecoveryPayloadFromLocation() {
 
   for (const candidate of candidates) {
     const params = new URLSearchParams(candidate);
-    const hasRecoveryToken =
+    const hasAuthToken =
       params.has("access_token") ||
       params.has("refresh_token") ||
       params.has("token_hash") ||
       params.has("code");
     const isRecovery =
       params.get("type") === "recovery" ||
-      (hasRecoveryToken && candidate.toLowerCase().includes("recovery"));
+      (hasAuthToken && candidate.toLowerCase().includes("recovery"));
+    const isSignupOrInvite =
+      params.get("type") === "signup" ||
+      params.get("type") === "invite" ||
+      params.get("type") === "email_change" ||
+      hasAuthToken;
     const hasError = params.has("error") || params.has("error_code");
 
-    if (isRecovery || hasError) {
+    if (isRecovery || isSignupOrInvite || hasError) {
       return candidate;
     }
   }
@@ -73,24 +78,24 @@ function getRecoveryPayloadFromLocation() {
 if (typeof window !== "undefined") {
   restoreGithubPagesRoute();
 
-  const recoveryPayload = getRecoveryPayloadFromLocation();
+  const authPayload = getAuthPayloadFromLocation();
 
-  if (recoveryPayload) {
-    const params = new URLSearchParams(recoveryPayload);
-    const nextHash =
+  if (authPayload) {
+    const params = new URLSearchParams(authPayload);
+    const isRecovery =
       params.get("type") === "recovery" ||
-      params.has("access_token") ||
-      params.has("token_hash") ||
-      params.has("code")
-        ? "/admin/reset-password"
-        : "/admin/login";
+      authPayload.toLowerCase().includes("recovery");
 
-    window.sessionStorage.setItem(RECOVERY_STORAGE_KEY, recoveryPayload);
+    if (isRecovery) {
+      window.sessionStorage.setItem(RECOVERY_STORAGE_KEY, authPayload);
+    }
 
     window.history.replaceState(
       {},
       document.title,
-      `${window.location.pathname}${nextHash}`,
+      isRecovery
+        ? "/admin/reset-password"
+        : `/auth/callback?${authPayload}`,
     );
   }
 }

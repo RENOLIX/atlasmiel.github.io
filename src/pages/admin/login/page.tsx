@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { LockKeyhole, Mail } from "lucide-react";
 import BrandLogo from "@/components/shop/BrandLogo";
@@ -11,6 +11,7 @@ import { hasSupabaseConfig } from "@/lib/supabase";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     session,
     loading,
@@ -24,6 +25,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
+  const verifiedStatus = new URLSearchParams(location.search).get("verified");
 
   const nextAdminPath = useMemo(() => {
     if (isAdmin) {
@@ -106,6 +108,16 @@ export default function AdminLoginPage() {
           {!hasSupabaseConfig ? (
             <p className="mt-3 text-xs text-red-600">
               Supabase n&apos;est pas encore configure dans l&apos;application.
+            </p>
+          ) : null}
+          {verifiedStatus === "1" ? (
+            <p className="mt-3 rounded-xl bg-green-50 px-4 py-3 text-xs font-semibold text-green-700">
+              Email verifie. L'utilisateur peut maintenant se connecter.
+            </p>
+          ) : null}
+          {verifiedStatus === "0" ? (
+            <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
+              Verification impossible ou lien expire. Renvoie une invitation depuis Supabase ou recrée l'utilisateur.
             </p>
           ) : null}
         </div>
