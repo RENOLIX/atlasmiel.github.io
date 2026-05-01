@@ -22,7 +22,6 @@ import {
   PRODUCT_PRICES,
   type ProductId,
 } from "@/pages/produits/data";
-import honeyDripForm from "@/assets/honey-drip-form.png";
 
 const BEE_IMAGE =
   "https://i.ibb.co/7tv7xmYg/2f-HKCYo-Yo1-Q04e-Etb-N7-Zt-XH4-P3-Uq-TZAWLEHUJa-Vwdls9h-Vu-Q9-CZhts-L4rl-Fnkub8uk-N8-ORPx4-Esj8-Vzo2-Vld-Z.png";
@@ -433,12 +432,7 @@ export default function ProduitDetail() {
           </section>
         </motion.div>
 
-        <section className="relative mt-20 max-w-4xl mx-auto px-0 pb-28 md:px-6">
-          <img
-            src={honeyDripForm}
-            alt=""
-            className="pointer-events-none absolute -bottom-6 right-0 z-0 w-28 translate-x-1/4 md:-bottom-10 md:right-8 md:w-36 md:translate-x-1/2"
-          />
+        <section className="relative mt-20 max-w-4xl mx-auto px-0 md:px-6">
           <motion.form
             id="formulaire-commande"
             onSubmit={handleSubmit(onSubmit)}

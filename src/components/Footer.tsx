@@ -21,47 +21,49 @@ export default function Footer() {
       transition={{ duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
       className="bg-[#dda560] text-[#24170c]"
     >
-      <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-3 gap-12">
-        <div className="flex flex-col items-center text-center">
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="mb-12 flex flex-col items-center text-center">
           <img src={atlasLogo} alt="ATLAS" className="mb-5 h-20 w-40 object-contain" />
           <p className="text-sm leading-relaxed max-w-xs opacity-80">
             Atlas-miel, miel naturel et produits de la ruche selectionnes avec soin.
           </p>
         </div>
 
-        <div className="text-left">
-          <h4 className="text-sm font-semibold uppercase tracking-widest mb-5">
-            Pages
-          </h4>
-          <ul className="space-y-3 text-right" dir="rtl">
-            {pages.map((page) => (
-              <li key={page.href}>
-                <Link to={page.href} className="text-sm opacity-80 hover:opacity-100 transition-opacity">
-                  {page.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="text-left">
+            <h4 className="text-sm font-semibold uppercase tracking-widest mb-5">
+              Pages
+            </h4>
+            <ul className="space-y-3 text-right" dir="rtl">
+              {pages.map((page) => (
+                <li key={page.href}>
+                  <Link to={page.href} className="text-sm opacity-80 hover:opacity-100 transition-opacity">
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        <div className="text-left">
-          <h4 className="text-sm font-semibold uppercase tracking-widest mb-5">
-            Nos coordonnées
-          </h4>
-          <ul className="space-y-3">
-            <li className="flex items-center gap-3 text-sm opacity-85">
-              <MapPin size={16} className="shrink-0" />
-              Alger
-            </li>
-            <li className="flex items-center gap-3 text-sm opacity-85">
-              <Phone size={16} className="shrink-0" />
-              Num : +213 561 45 82 86
-            </li>
-            <li className="flex items-center gap-3 text-sm opacity-85">
-              <Mail size={16} className="shrink-0" />
-              Contact@atlas-miel.com
-            </li>
-          </ul>
+          <div className="text-left">
+            <h4 className="text-sm font-semibold uppercase tracking-widest mb-5">
+              Nos coordonnées
+            </h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 text-sm opacity-85">
+                <MapPin size={16} className="shrink-0" />
+                Alger
+              </li>
+              <li className="flex items-center gap-3 text-sm opacity-85">
+                <Phone size={16} className="shrink-0" />
+                Num : +213 561 45 82 86
+              </li>
+              <li className="flex items-center gap-3 text-sm opacity-85">
+                <Mail size={16} className="shrink-0" />
+                Contact@atlas-miel.com
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
