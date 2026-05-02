@@ -75,10 +75,6 @@ export default function MerciPage() {
       const settings = await loadMetaPixelSettings();
       if (cancelled || !initializeMetaPixel(settings)) return;
 
-      const eventKey = orderNumber || `${order.productId ?? "order"}-${value}`;
-      const storageKey = `atlas-pixel-thanks-${eventKey}`;
-      if (window.sessionStorage.getItem(storageKey)) return;
-
       const payload = {
         content_ids: order.productId ? [order.productId] : [],
         content_name: order.productName,
@@ -88,9 +84,10 @@ export default function MerciPage() {
         value,
       };
 
-      trackMetaPixel("Lead", payload);
-      trackMetaPixel("Purchase", payload);
-      window.sessionStorage.setItem(storageKey, "1");
+      trackMetaPixel("Purchase", payload, {
+        dedupeKey: orderNumber || `${order.productId ?? "order"}-${value}`,
+        dedupeScope: "session",
+      });
     };
 
     void trackConversion();

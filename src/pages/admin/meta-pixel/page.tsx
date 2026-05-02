@@ -113,7 +113,7 @@ export default function AdminMetaPixelPage() {
       trackMetaPixel("AtlasPixelTest", {
         source: "admin",
         tested_at: new Date().toISOString(),
-      }, true);
+      }, { custom: true });
 
       setEnabled(true);
       setLastTest(new Date().toLocaleString("fr-DZ"));

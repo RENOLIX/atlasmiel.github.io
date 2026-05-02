@@ -12,6 +12,12 @@ export interface MetaPixelSettings {
   pixelId: string;
 }
 
+interface TrackMetaPixelOptions {
+  custom?: boolean;
+  dedupeKey?: string;
+  dedupeScope?: "page" | "session";
+}
+
 const DEFAULT_SETTINGS: MetaPixelSettings = {
   enabled: false,
   pixelId: "",
@@ -189,12 +195,35 @@ export function initializeMetaPixel(settings: MetaPixelSettings) {
   }
 }
 
-export function trackMetaPixel(eventName: string, params?: Record<string, unknown>, custom = false) {
+function getPixelDedupeStore(scope: TrackMetaPixelOptions["dedupeScope"]) {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return scope === "session" ? window.sessionStorage : null;
+}
+
+export function trackMetaPixel(
+  eventName: string,
+  params?: Record<string, unknown>,
+  options: TrackMetaPixelOptions = {},
+) {
   if (typeof window === "undefined" || !window.fbq) {
     return false;
   }
 
-  window.fbq(custom ? "trackCustom" : "track", eventName, params ?? {});
+  if (options.dedupeKey) {
+    const key = `atlas-pixel-${eventName}-${options.dedupeKey}`;
+    const store = getPixelDedupeStore(options.dedupeScope);
+
+    if (store?.getItem(key)) {
+      return false;
+    }
+
+    store?.setItem(key, "1");
+  }
+
+  window.fbq(options.custom ? "trackCustom" : "track", eventName, params ?? {});
   return true;
 }
 
@@ -254,7 +283,10 @@ export function MetaPixelTracker() {
       return;
     }
 
-    trackMetaPixel("PageView");
+    trackMetaPixel("PageView", undefined, {
+      dedupeKey: `${location.pathname}${location.search}`,
+      dedupeScope: "session",
+    });
   }, [location.pathname, location.search, settings]);
 
   return null;

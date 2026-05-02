@@ -282,6 +282,9 @@ export default function ProduitDetail() {
       content_type: "product",
       currency: "DZD",
       value: price,
+    }, {
+      dedupeKey: id,
+      dedupeScope: "session",
     });
   }, [id, productExists, productName, price]);
 
