@@ -113,7 +113,10 @@ export default function AdminMetaPixelPage() {
       trackMetaPixel("AtlasPixelTest", {
         source: "admin",
         tested_at: new Date().toISOString(),
-      }, { custom: true });
+      }, {
+        custom: true,
+        source: "src/pages/admin/meta-pixel/page.tsx:handleTest",
+      });
 
       setEnabled(true);
       setLastTest(new Date().toLocaleString("fr-DZ"));
@@ -169,7 +172,7 @@ export default function AdminMetaPixelPage() {
             <div>
               <p className="font-semibold">Activer le Meta Pixel</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Quand c'est actif, le site envoie PageView, ViewContent et Purchase.
+                Quand c'est actif, le site envoie PageView, ViewContent et Purchase sans auto-events.
               </p>
             </div>
             <input
@@ -204,7 +207,7 @@ export default function AdminMetaPixelPage() {
             <div>
               <h2 className="font-bold">Evenements envoyes</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                PageView sur les pages boutique, ViewContent sur les fiches produit, Purchase apres commande.
+                PageView sur les pages simples, ViewContent sur les fiches produit, Purchase sur la page merci.
               </p>
             </div>
           </div>

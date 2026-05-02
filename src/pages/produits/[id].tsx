@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Gift, ShieldCheck, Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -238,6 +238,7 @@ export default function ProduitDetail() {
   const productExists = Boolean(storedProduct || staticId);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState("500g");
+  const trackedViewContentRef = useRef("");
 
   const productName = staticId ? t(`prod.${staticId}.name`) : storedProduct ? getLocalizedProductName(storedProduct, i18n.language) : "";
   const productDesc = staticId ? t(`prod.${staticId}.desc`) : storedProduct ? getLocalizedProductDescription(storedProduct, i18n.language) : "";
@@ -272,10 +273,11 @@ export default function ProduitDetail() {
     : copy.fallbackBenefits;
 
   useEffect(() => {
-    if (!productExists || !id || !productName || price <= 0) {
+    if (!productExists || !id || !productName || price <= 0 || trackedViewContentRef.current === id) {
       return;
     }
 
+    trackedViewContentRef.current = id;
     trackMetaPixel("ViewContent", {
       content_ids: [id],
       content_name: productName,
@@ -283,8 +285,8 @@ export default function ProduitDetail() {
       currency: "DZD",
       value: price,
     }, {
-      dedupeKey: id,
-      dedupeScope: "session",
+      source: "src/pages/produits/[id].tsx:ViewContent",
+      productId: id,
     });
   }, [id, productExists, productName, price]);
 
@@ -325,6 +327,7 @@ export default function ProduitDetail() {
       quantity: data.quantity,
       value: total,
       currency: "DZD",
+      pixelSent: false,
     }));
     toast.success(`${copy.toast} - ${data.phone}`);
     reset({ quantity: 1, deliveryMethod: "domicile" });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 
@@ -14,8 +14,9 @@ export interface MetaPixelSettings {
 
 interface TrackMetaPixelOptions {
   custom?: boolean;
-  dedupeKey?: string;
-  dedupeScope?: "page" | "session";
+  source: string;
+  productId?: string;
+  orderId?: string;
 }
 
 const DEFAULT_SETTINGS: MetaPixelSettings = {
@@ -184,6 +185,7 @@ export function initializeMetaPixel(settings: MetaPixelSettings) {
     }
 
     if (window.__atlasMetaPixelId !== cleanSettings.pixelId) {
+      window.fbq("set", "autoConfig", false, cleanSettings.pixelId);
       window.fbq("init", cleanSettings.pixelId);
       window.__atlasMetaPixelId = cleanSettings.pixelId;
     }
@@ -195,41 +197,41 @@ export function initializeMetaPixel(settings: MetaPixelSettings) {
   }
 }
 
-function getPixelDedupeStore(scope: TrackMetaPixelOptions["dedupeScope"]) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return scope === "session" ? window.sessionStorage : null;
-}
-
 export function trackMetaPixel(
   eventName: string,
   params?: Record<string, unknown>,
-  options: TrackMetaPixelOptions = {},
+  options: TrackMetaPixelOptions = { source: "unknown" },
 ) {
   if (typeof window === "undefined" || !window.fbq) {
     return false;
   }
 
-  if (options.dedupeKey) {
-    const key = `atlas-pixel-${eventName}-${options.dedupeKey}`;
-    const store = getPixelDedupeStore(options.dedupeScope);
-
-    if (store?.getItem(key)) {
-      return false;
-    }
-
-    store?.setItem(key, "1");
-  }
+  console.log("[MetaPixel track]", {
+    eventName,
+    url: window.location.href,
+    productId: options.productId,
+    orderId: options.orderId,
+    source: options.source,
+  });
 
   window.fbq(options.custom ? "trackCustom" : "track", eventName, params ?? {});
   return true;
 }
 
+function isProductDetailPath(pathname: string) {
+  const cleanPath = pathname.replace(/^\/(ar|fr|en)(?=\/|$)/, "") || "/";
+  return /^\/produits\/[^/]+\/?$/.test(cleanPath);
+}
+
+function isMerciPath(pathname: string) {
+  const cleanPath = pathname.replace(/^\/(ar|fr|en)(?=\/|$)/, "") || "/";
+  return /^\/merci\/?$/.test(cleanPath);
+}
+
 export function MetaPixelTracker() {
   const location = useLocation();
   const [settings, setSettings] = useState<MetaPixelSettings>(() => getCachedMetaPixelSettings());
+  const lastPageViewRef = useRef("");
 
   useEffect(() => {
     let mounted = true;
@@ -279,13 +281,27 @@ export function MetaPixelTracker() {
     const isAdminArea =
       location.pathname.startsWith("/admin") || location.pathname.startsWith("/auth");
 
+    const shouldSkipPageView =
+      isAdminArea ||
+      isProductDetailPath(location.pathname) ||
+      isMerciPath(location.pathname);
+
     if (isAdminArea || !initializeMetaPixel(settings)) {
       return;
     }
 
+    if (shouldSkipPageView) {
+      return;
+    }
+
+    const pageKey = `${location.pathname}${location.search}`;
+    if (lastPageViewRef.current === pageKey) {
+      return;
+    }
+
+    lastPageViewRef.current = pageKey;
     trackMetaPixel("PageView", undefined, {
-      dedupeKey: `${location.pathname}${location.search}`,
-      dedupeScope: "session",
+      source: "src/lib/meta-pixel.tsx:MetaPixelTracker",
     });
   }, [location.pathname, location.search, settings]);
 
