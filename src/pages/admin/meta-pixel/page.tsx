@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  getCachedMetaPixelSettings,
   initializeMetaPixel,
   loadMetaPixelSettings,
   saveMetaPixelSettings,
@@ -16,9 +17,9 @@ import {
 
 export default function AdminMetaPixelPage() {
   const { canManageProducts } = useAuth();
-  const [pixelId, setPixelId] = useState("");
-  const [enabled, setEnabled] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const cachedSettings = getCachedMetaPixelSettings();
+  const [pixelId, setPixelId] = useState(cachedSettings.pixelId);
+  const [enabled, setEnabled] = useState(cachedSettings.enabled);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [lastTest, setLastTest] = useState<string | null>(null);
@@ -27,6 +28,11 @@ export default function AdminMetaPixelPage() {
     let mounted = true;
 
     const load = async () => {
+      const cached = getCachedMetaPixelSettings();
+      setPixelId(cached.pixelId);
+      setEnabled(cached.enabled);
+      initializeMetaPixel(cached);
+
       const settings = await loadMetaPixelSettings();
       if (!mounted) {
         return;
@@ -34,13 +40,26 @@ export default function AdminMetaPixelPage() {
 
       setPixelId(settings.pixelId);
       setEnabled(settings.enabled);
-      setLoading(false);
+      initializeMetaPixel(settings);
     };
 
     void load();
 
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        const cached = getCachedMetaPixelSettings();
+        setPixelId(cached.pixelId);
+        setEnabled(cached.enabled);
+        initializeMetaPixel(cached);
+        void load();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       mounted = false;
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
@@ -66,6 +85,7 @@ export default function AdminMetaPixelPage() {
         enabled,
         pixelId: cleanPixelId,
       });
+      initializeMetaPixel({ enabled, pixelId: cleanPixelId });
       toast.success("Meta Pixel sauvegarde.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Sauvegarde impossible.");
@@ -138,7 +158,6 @@ export default function AdminMetaPixelPage() {
               onChange={(event) => setPixelId(event.target.value.replace(/\D/g, ""))}
               inputMode="numeric"
               placeholder="123456789012345"
-              disabled={loading}
               className="h-12 text-base font-semibold"
             />
             <p className="text-xs text-muted-foreground">
@@ -162,11 +181,11 @@ export default function AdminMetaPixelPage() {
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="submit" size="lg" disabled={saving || loading}>
+            <Button type="submit" size="lg" disabled={saving}>
               <Save className="h-4 w-4 mr-2" />
               {saving ? "Sauvegarde..." : "Sauvegarder"}
             </Button>
-            <Button type="button" size="lg" variant="secondary" disabled={testing || loading} onClick={handleTest}>
+            <Button type="button" size="lg" variant="secondary" disabled={testing} onClick={handleTest}>
               <TestTube2 className="h-4 w-4 mr-2" />
               {testing ? "Test..." : "Tester le pixel"}
             </Button>

@@ -42,7 +42,7 @@ function normalizeSettings(value: unknown): MetaPixelSettings {
   };
 }
 
-function readLocalSettings() {
+export function getCachedMetaPixelSettings() {
   if (typeof window === "undefined") {
     return DEFAULT_SETTINGS;
   }
@@ -54,34 +54,72 @@ function readLocalSettings() {
   }
 }
 
-function writeLocalSettings(settings: MetaPixelSettings) {
+function writeLocalSettings(settings: MetaPixelSettings, notify = true) {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(META_PIXEL_STORAGE_KEY, JSON.stringify(settings));
-  window.dispatchEvent(new CustomEvent(META_PIXEL_CHANGED_EVENT));
+  try {
+    window.localStorage.setItem(META_PIXEL_STORAGE_KEY, JSON.stringify(settings));
+    if (notify) {
+      window.dispatchEvent(new CustomEvent(META_PIXEL_CHANGED_EVENT));
+    }
+  } catch (error) {
+    console.warn("Meta Pixel cache write error:", error);
+  }
 }
 
-export async function loadMetaPixelSettings() {
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      reject(new Error("Meta Pixel settings timeout"));
+    }, timeoutMs);
+
+    promise
+      .then((value) => {
+        window.clearTimeout(timeout);
+        resolve(value);
+      })
+      .catch((error) => {
+        window.clearTimeout(timeout);
+        reject(error);
+      });
+  });
+}
+
+export async function loadMetaPixelSettings(timeoutMs = 3500) {
+  const cachedSettings = getCachedMetaPixelSettings();
+
   if (!hasSupabaseConfig || !supabase) {
-    return readLocalSettings();
+    return cachedSettings;
   }
 
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select("value")
-    .eq("key", META_PIXEL_SETTING_KEY)
-    .maybeSingle();
+  try {
+    const { data, error } = await withTimeout(
+      Promise.resolve(supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", META_PIXEL_SETTING_KEY)
+        .maybeSingle()),
+      timeoutMs,
+    );
 
-  if (error) {
-    console.error("Meta Pixel settings fetch error:", error.message);
-    return readLocalSettings();
+    if (error) {
+      console.error("Meta Pixel settings fetch error:", error.message);
+      return cachedSettings;
+    }
+
+    if (!data?.value) {
+      return cachedSettings;
+    }
+
+    const settings = normalizeSettings(data.value);
+    writeLocalSettings(settings, false);
+    return settings;
+  } catch (error) {
+    console.error("Meta Pixel settings load fallback:", error);
+    return cachedSettings;
   }
-
-  const settings = normalizeSettings(data?.value);
-  writeLocalSettings(settings);
-  return settings;
 }
 
 export async function saveMetaPixelSettings(settings: MetaPixelSettings) {
@@ -162,16 +200,21 @@ export function trackMetaPixel(eventName: string, params?: Record<string, unknow
 
 export function MetaPixelTracker() {
   const location = useLocation();
-  const [settings, setSettings] = useState<MetaPixelSettings>(() => readLocalSettings());
+  const [settings, setSettings] = useState<MetaPixelSettings>(() => getCachedMetaPixelSettings());
 
   useEffect(() => {
     let mounted = true;
 
     const refresh = async () => {
       try {
+        const cachedSettings = getCachedMetaPixelSettings();
+        setSettings(cachedSettings);
+        initializeMetaPixel(cachedSettings);
+
         const nextSettings = await loadMetaPixelSettings();
         if (mounted) {
           setSettings(nextSettings);
+          initializeMetaPixel(nextSettings);
         }
       } catch (error) {
         console.error("Meta Pixel refresh error:", error);
@@ -181,13 +224,21 @@ export function MetaPixelTracker() {
     void refresh();
 
     const onChanged = () => void refresh();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refresh();
+      }
+    };
+
     window.addEventListener(META_PIXEL_CHANGED_EVENT, onChanged);
     window.addEventListener("storage", onChanged);
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       mounted = false;
       window.removeEventListener(META_PIXEL_CHANGED_EVENT, onChanged);
       window.removeEventListener("storage", onChanged);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
