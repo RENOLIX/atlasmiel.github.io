@@ -10,7 +10,6 @@ import {
 import type { EmailOtpType, Session, User } from "@supabase/supabase-js";
 import {
   createSecondarySupabaseClient,
-  getAuthCallbackRedirectUrl,
   getPasswordRecoveryRedirectUrl,
   hasSupabaseConfig,
   supabase,
@@ -41,7 +40,7 @@ interface AuthContextValue {
     email: string;
     password: string;
     role: BackofficeRole;
-  }) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
+  }) => Promise<{ error: string | null }>;
   updateBackofficeUserRole: (
     userId: string,
     nextRole: BackofficeRole,
@@ -378,7 +377,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!supabase || role !== "admin") {
       return {
         error: "Acces refuse.",
-        needsEmailConfirmation: false,
       };
     }
 
@@ -386,7 +384,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!worker) {
       return {
         error: "Supabase n'est pas configure.",
-        needsEmailConfirmation: false,
       };
     }
 
@@ -395,22 +392,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const { data, error } = await worker.auth.signUp({
       email: cleanEmail,
       password: input.password,
-      options: {
-        emailRedirectTo: getAuthCallbackRedirectUrl(),
-      },
     });
 
     if (error) {
       return {
         error: error.message,
-        needsEmailConfirmation: false,
       };
     }
 
     if (!data.user?.id) {
       return {
         error: "Impossible de recuperer l'identifiant du nouvel utilisateur.",
-        needsEmailConfirmation: false,
       };
     }
 
@@ -423,7 +415,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (accessError) {
       return {
         error: accessError.message,
-        needsEmailConfirmation: false,
       };
     }
 
@@ -431,7 +422,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     return {
       error: null,
-      needsEmailConfirmation: !data.session,
     };
   };
 

@@ -42,11 +42,7 @@ export default function AdminUsersPage() {
         return;
       }
 
-      toast.success(
-        result.needsEmailConfirmation
-          ? "Utilisateur cree. Il devra confirmer son email avant connexion."
-          : "Utilisateur ajoute au panel admin.",
-      );
+      toast.success("Utilisateur ajoute et active. Il peut se connecter directement.");
       setEmail("");
       setPassword("");
       setRole("employee");
@@ -151,6 +147,7 @@ export default function AdminUsersPage() {
               Le role <strong>administrateur</strong> peut gerer les produits,
               les commandes et les utilisateurs. Le role <strong>employe</strong>
               peut uniquement voir les commandes et imprimer les bordereaux.
+              Les comptes ajoutes ici sont actives automatiquement.
             </div>
 
             <Button type="submit" size="lg" disabled={submitting} className="w-full">
