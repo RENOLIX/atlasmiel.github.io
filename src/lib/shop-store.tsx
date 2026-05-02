@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useAuth } from "@/components/providers/auth";
 import { seedProducts } from "@/data/seed";
+import { normalizeProductTranslations } from "@/lib/localized-product";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 import type {
   CartItem,
@@ -78,7 +79,11 @@ function usePersistentState<T>(key: string, fallback: () => T) {
       return;
     }
 
-    window.localStorage.setItem(key, JSON.stringify(value));
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.warn(`Unable to persist ${key} locally:`, error);
+    }
   }, [key, value]);
 
   return [value, setValue] as const;
@@ -139,6 +144,7 @@ function productToRow(product: Product) {
     id: product.id,
     name: product.name,
     description: product.description,
+    translations: product.translations ?? {},
     price: product.price,
     compare_price: product.comparePrice ?? null,
     category: product.category,
@@ -191,6 +197,7 @@ function rowToProduct(row: Record<string, unknown>): Product {
     id: String(row.id),
     name: String(row.name ?? ""),
     description: String(row.description ?? ""),
+    translations: normalizeProductTranslations(row.translations),
     price: fallbackPrice,
     comparePrice: fallbackComparePrice,
     category: String(row.category ?? "femme") as Product["category"],

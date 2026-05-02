@@ -8,6 +8,7 @@ import { HONEY_COMB, PRODUCT_IDS, PRODUCT_IMAGES, PRODUCT_PRICES, PRODUCT_WEIGHT
 import { formatDzd } from "@/lib/currency";
 import { useStore } from "@/lib/shop-store";
 import { getLowestProductPrice } from "@/lib/product-pricing";
+import { getLocalizedProductDescription, getLocalizedProductName } from "@/lib/localized-product";
 
 export { PRODUCT_IDS };
 
@@ -50,8 +51,8 @@ export default function Produits() {
           {products.map((product, index) => {
             const id = product.id;
             const knownId = PRODUCT_IDS.includes(id as (typeof PRODUCT_IDS)[number]) ? id as (typeof PRODUCT_IDS)[number] : null;
-            const name = knownId ? t(`prod.${knownId}.name`) : product.name;
-            const desc = knownId ? t(`prod.${knownId}.desc`) : product.description;
+            const name = knownId ? t(`prod.${knownId}.name`) : getLocalizedProductName(product, i18n.language);
+            const desc = knownId ? t(`prod.${knownId}.desc`) : getLocalizedProductDescription(product, i18n.language);
             const image = product.images[0] ?? (knownId ? PRODUCT_IMAGES[knownId] : HONEY_COMB);
             const isNewProduct = index < 3;
 

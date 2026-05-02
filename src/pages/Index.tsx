@@ -19,6 +19,7 @@ import {
 } from "@/pages/produits/data";
 import { formatDzd } from "@/lib/currency";
 import { getLowestProductPrice } from "@/lib/product-pricing";
+import { getLocalizedProductName } from "@/lib/localized-product";
 import { useStore } from "@/lib/shop-store";
 import honeyLiquid from "@/assets/honey-liquid.png";
 import hiveProducts from "@/assets/hive-products.png";
@@ -268,7 +269,7 @@ export default function Index() {
               const knownId = PRODUCT_IDS.includes(product.id as (typeof PRODUCT_IDS)[number])
                 ? product.id as (typeof PRODUCT_IDS)[number]
                 : null;
-              const name = knownId ? t(`prod.${knownId}.name`) : product.name;
+              const name = knownId ? t(`prod.${knownId}.name`) : getLocalizedProductName(product, i18n.language);
               const tag = knownId ? t(`prod.${knownId}.tag`) : "ATLAS";
               const image = product.images[0] ?? (knownId ? PRODUCT_IMAGES[knownId] : HONEY_COMB);
 

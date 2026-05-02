@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Gift, ShieldCheck, Truck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/shop-store";
 import { formatDzd } from "@/lib/currency";
 import { trackMetaPixel } from "@/lib/meta-pixel";
+import { getLocalizedProductDescription, getLocalizedProductName } from "@/lib/localized-product";
 import { getWeightComparePrice, getWeightPrice } from "@/lib/product-pricing";
 import {
   HONEY_COMB,
@@ -222,6 +223,7 @@ function uniqueImages(images: string[]) {
 
 export default function ProduitDetail() {
   const { id, lng } = useParams<{ id: string; lng: string }>();
+  const navigate = useNavigate();
   const prefix = lng ? `/${lng}` : "";
   const { t, i18n } = useTranslation("common");
   const isRtl = i18n.dir() === "rtl";
@@ -236,10 +238,9 @@ export default function ProduitDetail() {
   const productExists = Boolean(storedProduct || staticId);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState("500g");
-  const [ordered, setOrdered] = useState(false);
 
-  const productName = staticId ? t(`prod.${staticId}.name`) : storedProduct?.name ?? "";
-  const productDesc = staticId ? t(`prod.${staticId}.desc`) : storedProduct?.description ?? "";
+  const productName = staticId ? t(`prod.${staticId}.name`) : storedProduct ? getLocalizedProductName(storedProduct, i18n.language) : "";
+  const productDesc = staticId ? t(`prod.${staticId}.desc`) : storedProduct ? getLocalizedProductDescription(storedProduct, i18n.language) : "";
   const basePrice = storedProduct?.price ?? (staticId ? PRODUCT_PRICES[staticId] : 0);
   const weights = (storedProduct?.weights?.length ? storedProduct.weights : ["500g", "1kg"]);
   const weightPrices = storedProduct?.weightPrices ?? (staticId ? PRODUCT_WEIGHT_PRICES[staticId] : {});
@@ -287,7 +288,7 @@ export default function ProduitDetail() {
   const onSubmit = async (data: FormValues) => {
     if (!productExists || !id) return;
 
-    await createOrder({
+    const order = await createOrder({
       customerName: data.name,
       customerEmail: "",
       customerPhone: data.phone,
@@ -314,24 +315,18 @@ export default function ProduitDetail() {
       paymentMethod: "Paiement a la livraison",
     });
 
-    setOrdered(true);
-    trackMetaPixel("Purchase", {
-      content_ids: [id],
-      content_name: productName,
-      content_type: "product",
-      currency: "DZD",
-      num_items: data.quantity,
+    window.sessionStorage.setItem("atlas-last-order", JSON.stringify({
+      orderNumber: order.orderNumber,
+      productId: id,
+      productName,
+      quantity: data.quantity,
       value: total,
-    });
+      currency: "DZD",
+    }));
     toast.success(`${copy.toast} - ${data.phone}`);
     reset({ quantity: 1, deliveryMethod: "domicile" });
     setValue("wilaya", "");
-    window.setTimeout(() => {
-      document.getElementById("message-merci-commande")?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 80);
+    navigate(`${prefix}/merci?order=${encodeURIComponent(order.orderNumber)}`, { replace: true });
   };
 
   const scrollToForm = () => {
@@ -488,16 +483,6 @@ export default function ProduitDetail() {
             <img src={BEE_IMAGE} alt="" className="bee-fly pointer-events-none absolute -top-12 right-2 z-20 w-24" />
             <h2 className="mb-6 text-center text-3xl font-extrabold text-[#c68e00]">{copy.formTitle}</h2>
 
-            {ordered ? (
-              <div id="message-merci-commande" className="rounded-2xl border border-green-200 bg-green-50 p-8 text-center">
-                <CheckCircle size={46} className="mx-auto mb-4 text-green-600" />
-                <h3 className="mb-2 text-2xl font-extrabold text-foreground">{copy.successTitle}</h3>
-                <p className="text-sm text-muted-foreground">{copy.successDesc}</p>
-                <button type="button" onClick={() => setOrdered(false)} className="mt-6 rounded-full bg-[#f4b400] px-6 py-3 text-sm font-bold text-black">
-                  {copy.newOrder}
-                </button>
-              </div>
-            ) : (
               <div className="space-y-5">
                 <input type="hidden" value={productName} readOnly />
                 <input type="hidden" value={selectedWeight} readOnly />
@@ -575,7 +560,6 @@ export default function ProduitDetail() {
                   {isSubmitting ? copy.submitting : copy.submit}
                 </button>
               </div>
-            )}
           </motion.form>
         </section>
       </main>

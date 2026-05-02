@@ -8,6 +8,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import ScrollToTop from "@/components/app/ScrollToTop";
+import AppErrorBoundary from "@/components/app/AppErrorBoundary";
 import { useAuth } from "@/components/providers/auth";
 import { DefaultProviders } from "@/components/providers/default";
 import LocaleWrapper from "@/components/providers/locale-wrapper";
@@ -27,6 +28,7 @@ import Produits from "@/pages/produits/page";
 import ProduitDetail from "@/pages/produits/[id]";
 import Histoire from "@/pages/histoire/page";
 import Contact from "@/pages/contact/page";
+import MerciPage from "@/pages/merci/page";
 import NotFound from "@/NotFound";
 import Intro from "@/components/Intro";
 import { MetaPixelTracker } from "@/lib/meta-pixel";
@@ -64,9 +66,11 @@ export default function App() {
 
   return (
     <DefaultProviders>
-      <BrowserRouter basename={basename}>
-        <AppRoutes />
-      </BrowserRouter>
+      <AppErrorBoundary>
+        <BrowserRouter basename={basename}>
+          <AppRoutes />
+        </BrowserRouter>
+      </AppErrorBoundary>
     </DefaultProviders>
   );
 }
@@ -104,6 +108,7 @@ function AppRoutes() {
             <Route path="produits/:id" element={<ProduitDetail />} />
             <Route path="histoire" element={<Histoire />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="merci" element={<MerciPage />} />
           </Route>
           <Route path="/:lng" element={<LocaleWrapper><Outlet /></LocaleWrapper>}>
             <Route index element={<Index />} />
@@ -111,6 +116,7 @@ function AppRoutes() {
             <Route path="produits/:id" element={<ProduitDetail />} />
             <Route path="histoire" element={<Histoire />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="merci" element={<MerciPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="*" element={<NotFound />} />

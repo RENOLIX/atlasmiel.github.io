@@ -18,6 +18,11 @@ const PRODUCT_DRAFT_PREFIX = "__atlas_admin_product_draft__";
 const EMPTY_FORM = {
   name: "",
   description: "",
+  translations: {
+    ar: { name: "", description: "" },
+    fr: { name: "", description: "" },
+    en: { name: "", description: "" },
+  },
   images: [] as string[],
   weights: "500g,1kg",
   weightPrices: { "500g": "", "1kg": "" } as Record<string, string>,
@@ -34,6 +39,11 @@ function createEmptyForm(): ProductFormState {
   return {
     ...EMPTY_FORM,
     images: [],
+    translations: {
+      ar: { ...EMPTY_FORM.translations.ar },
+      fr: { ...EMPTY_FORM.translations.fr },
+      en: { ...EMPTY_FORM.translations.en },
+    },
     weightPrices: { ...EMPTY_FORM.weightPrices },
     weightComparePrices: {},
     weightCompareEnabled: {},
@@ -56,6 +66,11 @@ function readProductDraft(key: string): ProductFormState | null {
       ...createEmptyForm(),
       ...draft,
       images: Array.isArray(draft.images) ? draft.images : [],
+      translations: {
+        ar: { ...EMPTY_FORM.translations.ar, ...draft.translations?.ar },
+        fr: { ...EMPTY_FORM.translations.fr, ...draft.translations?.fr },
+        en: { ...EMPTY_FORM.translations.en, ...draft.translations?.en },
+      },
       weightPrices: draft.weightPrices ?? {},
       weightComparePrices: draft.weightComparePrices ?? {},
       weightCompareEnabled: draft.weightCompareEnabled ?? {},
@@ -155,6 +170,20 @@ function productToForm(product: Product): ProductFormState {
   return {
     name: product.name,
     description: product.description,
+    translations: {
+      ar: {
+        name: product.translations?.ar?.name ?? product.name,
+        description: product.translations?.ar?.description ?? product.description,
+      },
+      fr: {
+        name: product.translations?.fr?.name ?? "",
+        description: product.translations?.fr?.description ?? "",
+      },
+      en: {
+        name: product.translations?.en?.name ?? "",
+        description: product.translations?.en?.description ?? "",
+      },
+    },
     images: product.images,
     weights: product.weights.join(","),
     weightPrices: getFormWeightPrices(product.weights, product.weightPrices, product.price),
@@ -268,6 +297,23 @@ export default function AdminProductEditorPage() {
         type === "checkbox" && event.target instanceof HTMLInputElement
           ? event.target.checked
           : value,
+    }));
+  };
+
+  const handleTranslationChange = (
+    locale: "ar" | "fr" | "en",
+    field: "name" | "description",
+    value: string,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      translations: {
+        ...current.translations,
+        [locale]: {
+          ...current.translations[locale],
+          [field]: value,
+        },
+      },
     }));
   };
 
@@ -457,6 +503,20 @@ export default function AdminProductEditorPage() {
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
+      translations: {
+        ar: {
+          name: form.translations.ar.name.trim() || form.name.trim(),
+          description: form.translations.ar.description.trim() || form.description.trim(),
+        },
+        fr: {
+          name: form.translations.fr.name.trim(),
+          description: form.translations.fr.description.trim(),
+        },
+        en: {
+          name: form.translations.en.name.trim(),
+          description: form.translations.en.description.trim(),
+        },
+      },
       price: getFirstWeightPrice(weights, form.weightPrices),
       comparePrice: undefined,
       category: DEFAULT_PRODUCT_CATEGORY,
@@ -553,6 +613,42 @@ export default function AdminProductEditorPage() {
             rows={4}
             className="w-full border border-input rounded-none px-3 py-2 text-sm bg-background resize-none"
           />
+        </div>
+
+        <div className="space-y-5 rounded-[24px] border border-border bg-white/75 p-5 md:col-span-2">
+          <div>
+            <p className="font-medium text-sm">Traductions publiques</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Ces champs controlent le nom et la description affiches quand le client change la langue.
+            </p>
+          </div>
+
+          {([
+            ["ar", "Arabe"],
+            ["fr", "Francais"],
+            ["en", "Anglais"],
+          ] as const).map(([locale, label]) => (
+            <div key={locale} className="grid grid-cols-1 gap-3 rounded-[18px] border border-border bg-background p-4 md:grid-cols-2">
+              <div className="space-y-1">
+                <Label>Nom {label}</Label>
+                <Input
+                  value={form.translations[locale].name}
+                  onChange={(event) => handleTranslationChange(locale, "name", event.target.value)}
+                  placeholder={locale === "fr" ? "Miel de sidr" : locale === "en" ? "Sidr honey" : "عسل السدر"}
+                  dir={locale === "ar" ? "rtl" : "ltr"}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Description {label}</Label>
+                <Input
+                  value={form.translations[locale].description}
+                  onChange={(event) => handleTranslationChange(locale, "description", event.target.value)}
+                  placeholder={locale === "fr" ? "Description en francais" : locale === "en" ? "English description" : "الوصف بالعربية"}
+                  dir={locale === "ar" ? "rtl" : "ltr"}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-4 rounded-[24px] border border-border bg-white/78 p-5 shadow-[0_20px_60px_-54px_rgba(219,97,149,0.7)] md:col-span-2">

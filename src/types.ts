@@ -12,6 +12,7 @@ export interface Product {
   id: string;
   name: string;
   description: string;
+  translations?: ProductTranslations;
   price: number;
   comparePrice?: number;
   category: ProductCategory;
@@ -30,6 +31,7 @@ export interface Product {
 export interface ProductDraft {
   name: string;
   description: string;
+  translations?: ProductTranslations;
   price: number;
   comparePrice?: number;
   category: ProductCategory;
@@ -44,6 +46,13 @@ export interface ProductDraft {
   featured: boolean;
   active: boolean;
 }
+
+export type ProductLocale = "ar" | "fr" | "en";
+
+export type ProductTranslations = Partial<Record<ProductLocale, {
+  name?: string;
+  description?: string;
+}>>;
 
 export interface CartItem {
   productId: string;
