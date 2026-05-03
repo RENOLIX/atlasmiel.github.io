@@ -13,15 +13,22 @@ function restoreGithubPagesRoute() {
     import.meta.env.BASE_URL === "/"
       ? ""
       : import.meta.env.BASE_URL.replace(/\/$/, "");
-  const route = window.location.search
-    .slice(2)
-    .replace(/~and~/g, "&")
-    .replace(/^\//, "");
+  const rawRoute = window.location.search.slice(2).replace(/^\//, "");
+  const separatorIndex = rawRoute.indexOf("&");
+  const routePath =
+    separatorIndex === -1
+      ? rawRoute
+      : rawRoute.slice(0, separatorIndex);
+  const routeQuery =
+    separatorIndex === -1
+      ? ""
+      : rawRoute.slice(separatorIndex + 1).replace(/~and~/g, "&");
+  const route = routePath.replace(/~and~/g, "&");
 
   window.history.replaceState(
     {},
     document.title,
-    `${basePath}/${route}${window.location.hash}`,
+    `${basePath}/${route}${routeQuery ? `?${routeQuery}` : ""}${window.location.hash}`,
   );
 }
 

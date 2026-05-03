@@ -233,8 +233,9 @@ export default function ProduitDetail() {
   const inputAlign = langKey === "ar" ? "text-right" : "text-left";
   const titleBorder = langKey === "ar" ? "border-r-4 pr-3" : "border-l-4 pl-3";
   const { getProductById, createOrder } = useStore();
-  const storedProduct = id ? getProductById(id) : undefined;
-  const staticId = isStaticId(id) ? id : null;
+  const normalizedId = id ? decodeURIComponent(id).split("&")[0] : undefined;
+  const storedProduct = normalizedId ? getProductById(normalizedId) : undefined;
+  const staticId = isStaticId(normalizedId) ? normalizedId : null;
   const productExists = Boolean(storedProduct || staticId);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedWeight, setSelectedWeight] = useState("500g");
@@ -256,7 +257,7 @@ export default function ProduitDetail() {
   useEffect(() => {
     setSelectedWeight(weights[0] ?? "500g");
     setActiveImage(0);
-  }, [id, weights.join("|")]);
+  }, [normalizedId, weights.join("|")]);
 
   const quantity = Number(watch("quantity") || 1);
   const wilaya = String(watch("wilaya") || "");
@@ -273,7 +274,7 @@ export default function ProduitDetail() {
     : copy.fallbackBenefits;
 
   useEffect(() => {
-    if (!productExists || !id || !productName || price <= 0 || trackedViewContentRef.current === id) {
+    if (!productExists || !normalizedId || !productName || price <= 0 || trackedViewContentRef.current === normalizedId) {
       return;
     }
 
@@ -281,23 +282,23 @@ export default function ProduitDetail() {
 
     const trackViewContent = async () => {
       const settings = await loadMetaPixelSettings();
-      if (cancelled || !initializeMetaPixel(settings) || trackedViewContentRef.current === id) {
+      if (cancelled || !initializeMetaPixel(settings) || trackedViewContentRef.current === normalizedId) {
         return;
       }
 
       const sent = trackMetaPixel("ViewContent", {
-        content_ids: [id],
+        content_ids: [normalizedId],
         content_name: productName,
         content_type: "product",
         currency: "DZD",
         value: price,
       }, {
         source: "src/pages/produits/[id].tsx:ViewContent",
-        productId: id,
+        productId: normalizedId,
       });
 
       if (sent) {
-        trackedViewContentRef.current = id;
+        trackedViewContentRef.current = normalizedId;
       }
     };
 
@@ -306,17 +307,17 @@ export default function ProduitDetail() {
     return () => {
       cancelled = true;
     };
-  }, [id, productExists, productName, price]);
+  }, [normalizedId, productExists, productName, price]);
 
   const onSubmit = async (data: FormValues) => {
-    if (!productExists || !id) return;
+    if (!productExists || !normalizedId) return;
 
     const order = await createOrder({
       customerName: data.name,
       customerEmail: "",
       customerPhone: data.phone,
       items: [{
-        productId: id,
+        productId: normalizedId,
         productName,
         quantity: data.quantity,
         price,
@@ -340,7 +341,7 @@ export default function ProduitDetail() {
 
     window.sessionStorage.setItem("atlas-last-order", JSON.stringify({
       orderNumber: order.orderNumber,
-      productId: id,
+      productId: normalizedId,
       productName,
       quantity: data.quantity,
       value: total,
