@@ -12,7 +12,7 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/shop-store";
 import { formatDzd } from "@/lib/currency";
-import { trackMetaPixel } from "@/lib/meta-pixel";
+import { initializeMetaPixel, loadMetaPixelSettings, trackMetaPixel } from "@/lib/meta-pixel";
 import { getLocalizedProductDescription, getLocalizedProductName } from "@/lib/localized-product";
 import { getWeightComparePrice, getWeightPrice } from "@/lib/product-pricing";
 import {
@@ -277,17 +277,35 @@ export default function ProduitDetail() {
       return;
     }
 
-    trackedViewContentRef.current = id;
-    trackMetaPixel("ViewContent", {
-      content_ids: [id],
-      content_name: productName,
-      content_type: "product",
-      currency: "DZD",
-      value: price,
-    }, {
-      source: "src/pages/produits/[id].tsx:ViewContent",
-      productId: id,
-    });
+    let cancelled = false;
+
+    const trackViewContent = async () => {
+      const settings = await loadMetaPixelSettings();
+      if (cancelled || !initializeMetaPixel(settings) || trackedViewContentRef.current === id) {
+        return;
+      }
+
+      const sent = trackMetaPixel("ViewContent", {
+        content_ids: [id],
+        content_name: productName,
+        content_type: "product",
+        currency: "DZD",
+        value: price,
+      }, {
+        source: "src/pages/produits/[id].tsx:ViewContent",
+        productId: id,
+      });
+
+      if (sent) {
+        trackedViewContentRef.current = id;
+      }
+    };
+
+    void trackViewContent();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, productExists, productName, price]);
 
   const onSubmit = async (data: FormValues) => {

@@ -218,13 +218,22 @@ export function trackMetaPixel(
   return true;
 }
 
-function isProductDetailPath(pathname: string) {
+function getCleanPath(pathname: string) {
   const cleanPath = pathname.replace(/^\/(ar|fr|en)(?=\/|$)/, "") || "/";
+  return cleanPath.replace(/\/$/, "") || "/";
+}
+
+function isHomePath(pathname: string) {
+  return getCleanPath(pathname) === "/";
+}
+
+function isProductDetailPath(pathname: string) {
+  const cleanPath = getCleanPath(pathname);
   return /^\/produits\/[^/]+\/?$/.test(cleanPath);
 }
 
 function isMerciPath(pathname: string) {
-  const cleanPath = pathname.replace(/^\/(ar|fr|en)(?=\/|$)/, "") || "/";
+  const cleanPath = getCleanPath(pathname);
   return /^\/merci\/?$/.test(cleanPath);
 }
 
@@ -255,21 +264,13 @@ export function MetaPixelTracker() {
     void refresh();
 
     const onChanged = () => void refresh();
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        void refresh();
-      }
-    };
-
     window.addEventListener(META_PIXEL_CHANGED_EVENT, onChanged);
     window.addEventListener("storage", onChanged);
-    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       mounted = false;
       window.removeEventListener(META_PIXEL_CHANGED_EVENT, onChanged);
       window.removeEventListener("storage", onChanged);
-      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
@@ -281,16 +282,20 @@ export function MetaPixelTracker() {
     const isAdminArea =
       location.pathname.startsWith("/admin") || location.pathname.startsWith("/auth");
 
+    const shouldTrackPageView =
+      isHomePath(location.pathname);
+
     const shouldSkipPageView =
       isAdminArea ||
+      !shouldTrackPageView ||
       isProductDetailPath(location.pathname) ||
       isMerciPath(location.pathname);
 
-    if (isAdminArea || !initializeMetaPixel(settings)) {
+    if (shouldSkipPageView) {
       return;
     }
 
-    if (shouldSkipPageView) {
+    if (!initializeMetaPixel(settings)) {
       return;
     }
 

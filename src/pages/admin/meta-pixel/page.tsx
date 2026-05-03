@@ -45,21 +45,8 @@ export default function AdminMetaPixelPage() {
 
     void load();
 
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        const cached = getCachedMetaPixelSettings();
-        setPixelId(cached.pixelId);
-        setEnabled(cached.enabled);
-        initializeMetaPixel(cached);
-        void load();
-      }
-    };
-
-    document.addEventListener("visibilitychange", onVisible);
-
     return () => {
       mounted = false;
-      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
@@ -172,7 +159,7 @@ export default function AdminMetaPixelPage() {
             <div>
               <p className="font-semibold">Activer le Meta Pixel</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Quand c'est actif, le site envoie PageView, ViewContent et Purchase sans auto-events.
+                Quand c'est actif, le site envoie PageView sur l'accueil, ViewContent sur une fiche produit et Purchase apres commande.
               </p>
             </div>
             <input
@@ -207,7 +194,7 @@ export default function AdminMetaPixelPage() {
             <div>
               <h2 className="font-bold">Evenements envoyes</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                PageView sur les pages simples, ViewContent sur les fiches produit, Purchase sur la page merci.
+                PageView uniquement sur l'accueil, ViewContent uniquement sur une fiche produit, Purchase uniquement sur la page merci apres une vraie commande.
               </p>
             </div>
           </div>
