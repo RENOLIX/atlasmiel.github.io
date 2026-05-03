@@ -248,7 +248,6 @@ export function StoreProvider({ children }: PropsWithChildren) {
   const [items, setItems] = usePersistentState<CartItem[]>(CART_KEY, () => []);
   const [seedAttempted, setSeedAttempted] = useState(false);
   const productsLoadedRef = useRef(false);
-  const ordersLoadedRef = useRef(false);
 
   useEffect(() => {
     const validIds = new Set(products.map((product) => product.id));
@@ -283,7 +282,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
   const fetchOrders = useCallback(async () => {
     if (!hasSupabaseConfig || !supabase || !canManageOrders) {
-      return;
+      return false;
     }
 
     const { data, error } = await supabase
@@ -293,10 +292,11 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
     if (error) {
       console.error("Supabase orders fetch error:", error.message);
-      return;
+      return false;
     }
 
     setOrders((data ?? []).map((row) => rowToOrder(row as Record<string, unknown>)));
+    return true;
   }, [canManageOrders, setOrders]);
 
   useEffect(() => {
@@ -337,10 +337,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    if (!ordersLoadedRef.current) {
-      ordersLoadedRef.current = true;
-      void fetchOrders();
-    }
+    void fetchOrders();
 
     const channel = client
       .channel("orders-sync")
@@ -355,6 +352,24 @@ export function StoreProvider({ children }: PropsWithChildren) {
 
     return () => {
       void client.removeChannel(channel);
+    };
+  }, [canManageOrders, fetchOrders]);
+
+  useEffect(() => {
+    if (!hasSupabaseConfig || !supabase || !canManageOrders) {
+      return;
+    }
+
+    const refreshOnVisible = () => {
+      if (document.visibilityState === "visible") {
+        void fetchOrders();
+      }
+    };
+
+    document.addEventListener("visibilitychange", refreshOnVisible);
+
+    return () => {
+      document.removeEventListener("visibilitychange", refreshOnVisible);
     };
   }, [canManageOrders, fetchOrders]);
 
@@ -530,7 +545,7 @@ export function StoreProvider({ children }: PropsWithChildren) {
     };
 
     if (hasSupabaseConfig && supabase) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("orders")
         .insert({
           order_number: order.orderNumber,
@@ -545,14 +560,13 @@ export function StoreProvider({ children }: PropsWithChildren) {
           shipping_address: order.shippingAddress,
           payment_method: order.paymentMethod,
         })
-        .select()
-        .single();
 
       if (error) {
         throw new Error(error.message);
       }
 
-      return rowToOrder(data as Record<string, unknown>);
+      setOrders((currentOrders) => [order, ...currentOrders.filter((entry) => entry.orderNumber !== order.orderNumber)]);
+      return order;
     }
 
     setOrders((currentOrders) => [order, ...currentOrders]);
