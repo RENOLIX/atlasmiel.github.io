@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { formatDzd } from "@/lib/currency";
-import { initializeMetaPixel, loadMetaPixelSettings, trackMetaPixel } from "@/lib/meta-pixel";
+import { ensureMetaPixelReady, trackMetaPixel } from "@/lib/meta-pixel";
 
 type LastOrder = {
   orderNumber?: string;
@@ -106,8 +106,8 @@ export default function MerciPage() {
         return;
       }
 
-      const settings = await loadMetaPixelSettings();
-      if (cancelled || !initializeMetaPixel(settings)) return;
+      const ready = await ensureMetaPixelReady();
+      if (cancelled || !ready) return;
 
       const payload = {
         content_ids: order.productId ? [order.productId] : [],

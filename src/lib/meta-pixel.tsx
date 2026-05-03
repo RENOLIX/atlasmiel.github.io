@@ -5,6 +5,7 @@ const META_PIXEL_STORAGE_KEY = "__atlas_meta_pixel_settings";
 const META_PIXEL_SETTING_KEY = "meta_pixel";
 const META_PIXEL_SCRIPT_ID = "atlas-meta-pixel-script";
 const META_PIXEL_CHANGED_EVENT = "atlas-meta-pixel-changed";
+const META_PIXEL_SETTINGS_TIMEOUT_MS = 12000;
 
 export interface MetaPixelSettings {
   enabled: boolean;
@@ -93,7 +94,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
   });
 }
 
-export async function loadMetaPixelSettings(timeoutMs = 3500) {
+export async function loadMetaPixelSettings(timeoutMs = META_PIXEL_SETTINGS_TIMEOUT_MS) {
   const cachedSettings = getCachedMetaPixelSettings();
 
   if (!hasSupabaseConfig || !supabase) {
@@ -126,6 +127,21 @@ export async function loadMetaPixelSettings(timeoutMs = 3500) {
     console.error("Meta Pixel settings load fallback:", error);
     return cachedSettings;
   }
+}
+
+export async function ensureMetaPixelReady(timeoutMs = META_PIXEL_SETTINGS_TIMEOUT_MS, attempts = 2) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const settings = await loadMetaPixelSettings(timeoutMs);
+    if (initializeMetaPixel(settings)) {
+      return true;
+    }
+
+    if (attempt < attempts - 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, 1200));
+    }
+  }
+
+  return false;
 }
 
 export async function saveMetaPixelSettings(settings: MetaPixelSettings) {

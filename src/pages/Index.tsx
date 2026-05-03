@@ -21,7 +21,7 @@ import { formatDzd } from "@/lib/currency";
 import { getLowestProductPrice } from "@/lib/product-pricing";
 import { getLocalizedProductName } from "@/lib/localized-product";
 import { useStore } from "@/lib/shop-store";
-import { initializeMetaPixel, loadMetaPixelSettings, trackMetaPixel } from "@/lib/meta-pixel";
+import { ensureMetaPixelReady, trackMetaPixel } from "@/lib/meta-pixel";
 import honeyLiquid from "@/assets/honey-liquid.png";
 import hiveProducts from "@/assets/hive-products.png";
 import ctaHoneycomb from "@/assets/golden-honey-dripping-from-honeycomb.jpg";
@@ -87,8 +87,8 @@ export default function Index() {
         return;
       }
 
-      const settings = await loadMetaPixelSettings();
-      if (cancelled || !initializeMetaPixel(settings) || homePageViewSentRef.current) {
+      const ready = await ensureMetaPixelReady();
+      if (cancelled || !ready || homePageViewSentRef.current) {
         return;
       }
 

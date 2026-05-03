@@ -12,7 +12,7 @@ import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { useStore } from "@/lib/shop-store";
 import { formatDzd } from "@/lib/currency";
-import { initializeMetaPixel, loadMetaPixelSettings, trackMetaPixel } from "@/lib/meta-pixel";
+import { ensureMetaPixelReady, trackMetaPixel } from "@/lib/meta-pixel";
 import { getLocalizedProductDescription, getLocalizedProductName } from "@/lib/localized-product";
 import { getWeightComparePrice, getWeightPrice } from "@/lib/product-pricing";
 import {
@@ -281,8 +281,8 @@ export default function ProduitDetail() {
     let cancelled = false;
 
     const trackViewContent = async () => {
-      const settings = await loadMetaPixelSettings();
-      if (cancelled || !initializeMetaPixel(settings) || trackedViewContentRef.current === normalizedId) {
+      const ready = await ensureMetaPixelReady();
+      if (cancelled || !ready || trackedViewContentRef.current === normalizedId) {
         return;
       }
 
