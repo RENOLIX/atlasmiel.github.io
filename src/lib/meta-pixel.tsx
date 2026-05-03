@@ -6,6 +6,10 @@ const META_PIXEL_SETTING_KEY = "meta_pixel";
 const META_PIXEL_SCRIPT_ID = "atlas-meta-pixel-script";
 const META_PIXEL_CHANGED_EVENT = "atlas-meta-pixel-changed";
 const META_PIXEL_SETTINGS_TIMEOUT_MS = 12000;
+const DEFAULT_PIXEL_ID = String(import.meta.env.VITE_META_PIXEL_ID ?? "").replace(/\D/g, "");
+const DEFAULT_PIXEL_ENABLED =
+  String(import.meta.env.VITE_META_PIXEL_ENABLED ?? "").toLowerCase() === "true"
+  && Boolean(DEFAULT_PIXEL_ID);
 
 export interface MetaPixelSettings {
   enabled: boolean;
@@ -20,8 +24,8 @@ interface TrackMetaPixelOptions {
 }
 
 const DEFAULT_SETTINGS: MetaPixelSettings = {
-  enabled: false,
-  pixelId: "",
+  enabled: DEFAULT_PIXEL_ENABLED,
+  pixelId: DEFAULT_PIXEL_ID,
 };
 
 declare global {
