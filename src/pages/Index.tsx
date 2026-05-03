@@ -21,6 +21,7 @@ import { formatDzd } from "@/lib/currency";
 import { getLowestProductPrice } from "@/lib/product-pricing";
 import { getLocalizedProductName } from "@/lib/localized-product";
 import { useStore } from "@/lib/shop-store";
+import { initializeMetaPixel, loadMetaPixelSettings, trackMetaPixel } from "@/lib/meta-pixel";
 import honeyLiquid from "@/assets/honey-liquid.png";
 import hiveProducts from "@/assets/hive-products.png";
 import ctaHoneycomb from "@/assets/golden-honey-dripping-from-honeycomb.jpg";
@@ -46,6 +47,7 @@ const itemReveal = {
 export default function Index() {
   const heroRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const homePageViewSentRef = useRef(false);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const { t, i18n } = useTranslation("common");
@@ -76,6 +78,35 @@ export default function Index() {
   const featuredProducts = activeProducts
     .filter((product) => product.featured)
     .slice(0, 3);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const trackHomePageView = async () => {
+      if (homePageViewSentRef.current) {
+        return;
+      }
+
+      const settings = await loadMetaPixelSettings();
+      if (cancelled || !initializeMetaPixel(settings) || homePageViewSentRef.current) {
+        return;
+      }
+
+      const sent = trackMetaPixel("PageView", undefined, {
+        source: "src/pages/Index.tsx:HomePageView",
+      });
+
+      if (sent) {
+        homePageViewSentRef.current = true;
+      }
+    };
+
+    void trackHomePageView();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;

@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 
 const META_PIXEL_STORAGE_KEY = "__atlas_meta_pixel_settings";
@@ -218,29 +217,8 @@ export function trackMetaPixel(
   return true;
 }
 
-function getCleanPath(pathname: string) {
-  const cleanPath = pathname.replace(/^\/(ar|fr|en)(?=\/|$)/, "") || "/";
-  return cleanPath.replace(/\/$/, "") || "/";
-}
-
-function isHomePath(pathname: string) {
-  return getCleanPath(pathname) === "/";
-}
-
-function isProductDetailPath(pathname: string) {
-  const cleanPath = getCleanPath(pathname);
-  return /^\/produits\/[^/]+\/?$/.test(cleanPath);
-}
-
-function isMerciPath(pathname: string) {
-  const cleanPath = getCleanPath(pathname);
-  return /^\/merci\/?$/.test(cleanPath);
-}
-
 export function MetaPixelTracker() {
-  const location = useLocation();
   const [settings, setSettings] = useState<MetaPixelSettings>(() => getCachedMetaPixelSettings());
-  const lastPageViewRef = useRef("");
 
   useEffect(() => {
     let mounted = true;
@@ -277,38 +255,6 @@ export function MetaPixelTracker() {
   useEffect(() => {
     initializeMetaPixel(settings);
   }, [settings]);
-
-  useEffect(() => {
-    const isAdminArea =
-      location.pathname.startsWith("/admin") || location.pathname.startsWith("/auth");
-
-    const shouldTrackPageView =
-      isHomePath(location.pathname);
-
-    const shouldSkipPageView =
-      isAdminArea ||
-      !shouldTrackPageView ||
-      isProductDetailPath(location.pathname) ||
-      isMerciPath(location.pathname);
-
-    if (shouldSkipPageView) {
-      return;
-    }
-
-    if (!initializeMetaPixel(settings)) {
-      return;
-    }
-
-    const pageKey = `${location.pathname}${location.search}`;
-    if (lastPageViewRef.current === pageKey) {
-      return;
-    }
-
-    lastPageViewRef.current = pageKey;
-    trackMetaPixel("PageView", undefined, {
-      source: "src/lib/meta-pixel.tsx:MetaPixelTracker",
-    });
-  }, [location.pathname, location.search, settings]);
 
   return null;
 }
