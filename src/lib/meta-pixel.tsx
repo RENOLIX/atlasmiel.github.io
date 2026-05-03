@@ -208,6 +208,7 @@ export function trackMetaPixel(
   console.log("[MetaPixel track]", {
     eventName,
     url: window.location.href,
+    params,
     productId: options.productId,
     orderId: options.orderId,
     source: options.source,

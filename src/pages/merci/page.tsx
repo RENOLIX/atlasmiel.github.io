@@ -63,6 +63,16 @@ function writeLastOrder(order: LastOrder) {
   window.sessionStorage.setItem("atlas-last-order", JSON.stringify(order));
 }
 
+function normalizePurchaseValue(value: unknown) {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
+}
+
+function normalizePurchaseCurrency(currency: unknown) {
+  const cleanCurrency = String(currency ?? "DZD").trim().toUpperCase();
+  return /^[A-Z]{3}$/.test(cleanCurrency) ? cleanCurrency : "DZD";
+}
+
 export default function MerciPage() {
   const { i18n } = useTranslation("common");
   const { lng } = useParams<{ lng: string }>();
@@ -73,13 +83,26 @@ export default function MerciPage() {
   const order = useMemo(() => readLastOrder(), []);
   const orderNumber = searchParams.get("order") || order.orderNumber || "";
   const isRealOrderPage = Boolean(order.orderNumber && searchParams.get("order") === order.orderNumber);
-  const value = Number(order.value || 0);
+  const value = normalizePurchaseValue(order.value);
+  const currency = normalizePurchaseCurrency(order.currency);
 
   useEffect(() => {
     let cancelled = false;
 
     const trackConversion = async () => {
       if (!isRealOrderPage || !order.orderNumber || order.pixelSent) {
+        return;
+      }
+
+      if (value <= 0) {
+        console.warn("[MetaPixel purchase skipped]", {
+          reason: "missing-or-invalid-value",
+          url: window.location.href,
+          orderId: order.orderNumber,
+          value: order.value,
+          currency: order.currency,
+          source: "src/pages/merci/page.tsx:Purchase",
+        });
         return;
       }
 
@@ -90,18 +113,20 @@ export default function MerciPage() {
         content_ids: order.productId ? [order.productId] : [],
         content_name: order.productName,
         content_type: "product",
-        currency: order.currency || "DZD",
+        currency,
         num_items: Number(order.quantity || 1),
         value,
       };
 
-      trackMetaPixel("Purchase", payload, {
+      const sent = trackMetaPixel("Purchase", payload, {
         source: "src/pages/merci/page.tsx:Purchase",
         productId: order.productId,
         orderId: order.orderNumber,
       });
 
-      writeLastOrder({ ...order, pixelSent: true });
+      if (sent) {
+        writeLastOrder({ ...order, pixelSent: true, value, currency });
+      }
     };
 
     void trackConversion();
@@ -109,7 +134,7 @@ export default function MerciPage() {
     return () => {
       cancelled = true;
     };
-  }, [isRealOrderPage, order, value]);
+  }, [currency, isRealOrderPage, order, value]);
 
   return (
     <div className="min-h-screen bg-[oklch(0.985_0.018_86)]" dir={langKey === "ar" ? "rtl" : "ltr"}>
