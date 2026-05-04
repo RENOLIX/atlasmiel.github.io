@@ -126,7 +126,7 @@ export default function AdminProductsPage() {
 
                 <div className="grid grid-cols-3 gap-2 mt-4">
                   <Link
-                    to={`/shop/product/${product.id}`}
+                    to={`/produits/${product.id}`}
                     className="inline-flex h-10 items-center justify-center gap-2 border border-border bg-white/75 text-xs uppercase tracking-[0.18em]"
                   >
                     <Eye className="h-4 w-4" /> Voir
@@ -220,7 +220,7 @@ export default function AdminProductsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <Link
-                          to={`/shop/product/${product.id}`}
+                          to={`/produits/${product.id}`}
                           className="inline-flex h-8 w-8 items-center justify-center hover:bg-[#fff0f6]"
                           title="Voir"
                         >

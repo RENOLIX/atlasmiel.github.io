@@ -5,6 +5,7 @@ import {
   Outlet,
   Route,
   Routes,
+  useParams,
   useLocation,
 } from "react-router-dom";
 import ScrollToTop from "@/components/app/ScrollToTop";
@@ -58,6 +59,37 @@ function ArabicDefaultWrapper() {
   return <Outlet />;
 }
 
+function LegacyRouteRedirect({ target }: { target: string }) {
+  const location = useLocation();
+
+  return <Navigate to={`${target}${location.search}${location.hash}`} replace />;
+}
+
+function LegacyLocalizedRouteRedirect({ target }: { target: string }) {
+  const location = useLocation();
+  const { lng } = useParams<{ lng: string }>();
+  const prefix = lng ? `/${lng}` : "";
+
+  return <Navigate to={`${prefix}${target}${location.search}${location.hash}`} replace />;
+}
+
+function LegacyProductRedirect() {
+  const location = useLocation();
+  const { id } = useParams<{ id: string }>();
+  const cleanId = (id ? decodeURIComponent(id) : "").split(/[?&]/)[0];
+
+  return <Navigate to={`/produits/${cleanId}${location.search}${location.hash}`} replace />;
+}
+
+function LegacyLocalizedProductRedirect() {
+  const location = useLocation();
+  const { id, lng } = useParams<{ id: string; lng: string }>();
+  const prefix = lng ? `/${lng}` : "";
+  const cleanId = (id ? decodeURIComponent(id) : "").split(/[?&]/)[0];
+
+  return <Navigate to={`${prefix}/produits/${cleanId}${location.search}${location.hash}`} replace />;
+}
+
 export default function App() {
   const basename =
     import.meta.env.BASE_URL === "/"
@@ -91,6 +123,12 @@ function AppRoutes() {
       <Suspense fallback={<div />}>
         <Routes>
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/shop" element={<LegacyRouteRedirect target="/produits" />} />
+          <Route path="/shop/product/:id" element={<LegacyProductRedirect />} />
+          <Route path="/about" element={<LegacyRouteRedirect target="/histoire" />} />
+          <Route path="/cart" element={<LegacyRouteRedirect target="/produits" />} />
+          <Route path="/checkout" element={<LegacyRouteRedirect target="/produits" />} />
+          <Route path="/checkout/success" element={<LegacyRouteRedirect target="/merci" />} />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
           <Route path="/admin" element={<AdminLayout />}>
@@ -112,6 +150,12 @@ function AppRoutes() {
           </Route>
           <Route path="/:lng" element={<LocaleWrapper><Outlet /></LocaleWrapper>}>
             <Route index element={<Index />} />
+            <Route path="shop" element={<LegacyLocalizedRouteRedirect target="/produits" />} />
+            <Route path="shop/product/:id" element={<LegacyLocalizedProductRedirect />} />
+            <Route path="about" element={<LegacyLocalizedRouteRedirect target="/histoire" />} />
+            <Route path="cart" element={<LegacyLocalizedRouteRedirect target="/produits" />} />
+            <Route path="checkout" element={<LegacyLocalizedRouteRedirect target="/produits" />} />
+            <Route path="checkout/success" element={<LegacyLocalizedRouteRedirect target="/merci" />} />
             <Route path="produits" element={<Produits />} />
             <Route path="produits/:id" element={<ProduitDetail />} />
             <Route path="histoire" element={<Histoire />} />

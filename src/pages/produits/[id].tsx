@@ -233,7 +233,7 @@ export default function ProduitDetail() {
   const inputAlign = langKey === "ar" ? "text-right" : "text-left";
   const titleBorder = langKey === "ar" ? "border-r-4 pr-3" : "border-l-4 pl-3";
   const { getProductById, createOrder } = useStore();
-  const normalizedId = id ? decodeURIComponent(id).split("&")[0] : undefined;
+  const normalizedId = id ? decodeURIComponent(id).split(/[?&]/)[0] : undefined;
   const storedProduct = normalizedId ? getProductById(normalizedId) : undefined;
   const staticId = isStaticId(normalizedId) ? normalizedId : null;
   const productExists = Boolean(storedProduct || staticId);

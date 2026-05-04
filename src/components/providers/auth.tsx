@@ -49,7 +49,8 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
+const RECOVERY_STORAGE_KEY = "__atlas_supabase_recovery_payload";
+const LEGACY_RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
 const MAX_BACKOFFICE_USERS = 50;
 
 function rowToAdminUser(row: Record<string, unknown>): AdminUserRecord {
@@ -153,7 +154,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return (
       window.location.hash.includes("type=recovery") ||
       window.location.search.includes("type=recovery") ||
-      Boolean(window.sessionStorage.getItem(RECOVERY_STORAGE_KEY))
+      Boolean(
+        window.sessionStorage.getItem(RECOVERY_STORAGE_KEY) ||
+        window.sessionStorage.getItem(LEGACY_RECOVERY_STORAGE_KEY),
+      )
     );
   });
 
@@ -203,7 +207,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const bootstrapSession = async () => {
       const pendingRecovery =
         typeof window !== "undefined"
-          ? window.sessionStorage.getItem(RECOVERY_STORAGE_KEY)
+          ? (
+              window.sessionStorage.getItem(RECOVERY_STORAGE_KEY) ||
+              window.sessionStorage.getItem(LEGACY_RECOVERY_STORAGE_KEY)
+            )
           : null;
 
       if (pendingRecovery) {
@@ -241,6 +248,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
 
         window.sessionStorage.removeItem(RECOVERY_STORAGE_KEY);
+        window.sessionStorage.removeItem(LEGACY_RECOVERY_STORAGE_KEY);
       }
 
       const { data } = await client.auth.getSession();

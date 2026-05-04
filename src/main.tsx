@@ -2,7 +2,8 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-const RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
+const RECOVERY_STORAGE_KEY = "__atlas_supabase_recovery_payload";
+const LEGACY_RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
 const BUILD_ID_STORAGE_KEY = "__atlas_build_id";
 const BUILD_ID = String(import.meta.env.VITE_BUILD_ID ?? "dev");
 const PRODUCT_DRAFT_PREFIX = "__atlas_admin_product_draft__";
@@ -10,6 +11,7 @@ const LOCAL_STORAGE_KEYS_TO_RESET = [
   "__atlas_meta_pixel_settings",
   "maison-products-v2",
   "maison-orders-v2",
+  "maison-cart-v2",
 ];
 const SESSION_STORAGE_KEYS_TO_RESET = [
   "atlas-last-order",
@@ -140,6 +142,7 @@ if (typeof window !== "undefined") {
 
     if (isRecovery) {
       window.sessionStorage.setItem(RECOVERY_STORAGE_KEY, authPayload);
+      window.sessionStorage.removeItem(LEGACY_RECOVERY_STORAGE_KEY);
     }
 
     window.history.replaceState(
