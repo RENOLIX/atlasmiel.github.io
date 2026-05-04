@@ -3,6 +3,45 @@ import App from "./App";
 import "./index.css";
 
 const RECOVERY_STORAGE_KEY = "__mina_supabase_recovery_payload";
+const BUILD_ID_STORAGE_KEY = "__atlas_build_id";
+const BUILD_ID = String(import.meta.env.VITE_BUILD_ID ?? "dev");
+const PRODUCT_DRAFT_PREFIX = "__atlas_admin_product_draft__";
+const LOCAL_STORAGE_KEYS_TO_RESET = [
+  "__atlas_meta_pixel_settings",
+  "maison-products-v2",
+  "maison-orders-v2",
+];
+const SESSION_STORAGE_KEYS_TO_RESET = [
+  "atlas-last-order",
+];
+
+function applyBuildVersionGuard() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const previousBuildId = window.localStorage.getItem(BUILD_ID_STORAGE_KEY);
+  if (previousBuildId === BUILD_ID) {
+    return;
+  }
+
+  for (const key of LOCAL_STORAGE_KEYS_TO_RESET) {
+    window.localStorage.removeItem(key);
+  }
+
+  for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+    const key = window.localStorage.key(index);
+    if (key?.startsWith(PRODUCT_DRAFT_PREFIX)) {
+      window.localStorage.removeItem(key);
+    }
+  }
+
+  for (const key of SESSION_STORAGE_KEYS_TO_RESET) {
+    window.sessionStorage.removeItem(key);
+  }
+
+  window.localStorage.setItem(BUILD_ID_STORAGE_KEY, BUILD_ID);
+}
 
 function restoreGithubPagesRoute() {
   if (typeof window === "undefined" || !window.location.search.startsWith("?/")) {
@@ -14,13 +53,18 @@ function restoreGithubPagesRoute() {
       ? ""
       : import.meta.env.BASE_URL.replace(/\/$/, "");
   const rawRoute = window.location.search.slice(2).replace(/^\//, "");
-  const separatorIndex = rawRoute.indexOf("&");
+  const querySentinelIndex = rawRoute.indexOf("~q~");
+  const separatorIndex = querySentinelIndex === -1 ? rawRoute.indexOf("&") : -1;
   const routePath =
-    separatorIndex === -1
+    querySentinelIndex !== -1
+      ? rawRoute.slice(0, querySentinelIndex)
+      : separatorIndex === -1
       ? rawRoute
       : rawRoute.slice(0, separatorIndex);
   const routeQuery =
-    separatorIndex === -1
+    querySentinelIndex !== -1
+      ? rawRoute.slice(querySentinelIndex + 3).replace(/~and~/g, "&")
+      : separatorIndex === -1
       ? ""
       : rawRoute.slice(separatorIndex + 1).replace(/~and~/g, "&");
   const route = routePath.replace(/~and~/g, "&");
@@ -83,6 +127,7 @@ function getAuthPayloadFromLocation() {
 }
 
 if (typeof window !== "undefined") {
+  applyBuildVersionGuard();
   restoreGithubPagesRoute();
 
   const authPayload = getAuthPayloadFromLocation();
