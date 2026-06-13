@@ -178,6 +178,7 @@ alter table public.site_settings enable row level security;
 
 grant usage on schema public to anon, authenticated;
 grant insert on table public.orders to anon, authenticated;
+grant select on table public.orders to anon, authenticated;
 
 drop policy if exists "public can read active products" on public.products;
 create policy "public can read active products"
@@ -207,6 +208,13 @@ on public.orders
 for insert
 to anon, authenticated
 with check (true);
+
+drop policy if exists "public can read inserted order response" on public.orders;
+create policy "public can read inserted order response"
+on public.orders
+for select
+to anon, authenticated
+using (current_setting('request.method', true) = 'POST');
 
 drop policy if exists "backoffice can read orders" on public.orders;
 create policy "backoffice can read orders"
