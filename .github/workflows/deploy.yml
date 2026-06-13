@@ -18,8 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VITE_SUPABASE_URL: https://uvvavukmbffwnecvfiys.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_cfSnUnFt19bnwLOqQ-l6Dg_Bei01S5Y
+      VITE_SUPABASE_URL: https://oodlpererkbxhiuugbax.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_Iy7vBnXW9i9wb-TkEBSuFw_mA-k0JSr
       VITE_PUBLIC_SITE_URL: https://atlas-miel.com/
       VITE_META_PIXEL_ID: 801705945953894
       VITE_META_PIXEL_ENABLED: "true"

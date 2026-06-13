@@ -176,6 +176,9 @@ alter table public.orders enable row level security;
 alter table public.admin_users enable row level security;
 alter table public.site_settings enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant insert on table public.orders to anon, authenticated;
+
 drop policy if exists "public can read active products" on public.products;
 create policy "public can read active products"
 on public.products

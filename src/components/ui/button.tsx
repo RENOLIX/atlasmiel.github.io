@@ -1,30 +1,19 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "secondary" | "outline" | "ghost" | "destructive";
-  size?: "default" | "sm" | "lg" | "icon";
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: "primary" | "secondary" | "ghost" | "danger";
 };
 
-export function Button({
-  className,
-  variant = "default",
-  size = "default",
-  ...props
-}: ButtonProps) {
+export function Button({ className, variant = "primary", ...props }: Props) {
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-none text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
-        variant === "default" && "bg-primary text-primary-foreground hover:bg-primary/90",
-        variant === "secondary" && "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        variant === "outline" && "border border-border bg-white/75 hover:bg-muted",
-        variant === "ghost" && "hover:bg-muted",
-        variant === "destructive" && "bg-red-600 text-white hover:bg-red-700",
-        size === "default" && "h-11 px-5",
-        size === "sm" && "h-9 px-4 text-xs",
-        size === "lg" && "h-12 px-6 text-xs tracking-widest uppercase",
-        size === "icon" && "h-9 w-9",
+        "inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-bold transition duration-200 disabled:cursor-not-allowed disabled:opacity-60",
+        variant === "primary" && "bg-[#f0a429] text-[#24160b] hover:bg-[#ffbd4a]",
+        variant === "secondary" && "bg-white text-[#24160b] border border-[#e7d2a6] hover:bg-[#fff9eb]",
+        variant === "ghost" && "bg-transparent text-white/90 hover:text-white",
+        variant === "danger" && "bg-[#fee2e2] text-[#b42318] hover:bg-[#fecaca]",
         className,
       )}
       {...props}
